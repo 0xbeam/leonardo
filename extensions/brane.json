@@ -1,0 +1,18 @@
+{
+  "name": "brane",
+  "description": "Terminal UI extensions — cursor blink and active log line pulse",
+  "keyframes": {
+    "blink": {
+      "0%, 100%": "opacity: 1",
+      "50%": "opacity: 0"
+    },
+    "pulse-subtle": {
+      "0%, 100%": "opacity: 1",
+      "50%": "opacity: 0.6"
+    }
+  },
+  "animations": {
+    "blink": "blink 1s step-end infinite",
+    "pulse-subtle": "pulse-subtle 1.5s ease-in-out infinite"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "gravity-core",
+  "version": "1.0.0",
+  "description": "Gravity Design System — single source of truth for tokens, utilities, and design contract",
+  "main": "dist/gravity.css",
+  "scripts": {
+    "build": "node build.js",
+    "push": "node build.js --push",
+    "diff": "node build.js --diff"
+  }
+}

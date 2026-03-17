@@ -1,0 +1,38 @@
+{
+  "spacekayak-ops": {
+    "path": "../Spacekayak.ops",
+    "css": "src/index.css",
+    "framework": "vite-tw4",
+    "theme": "@theme",
+    "extensions": [],
+    "port": 3000,
+    "label": "Fermi Ops"
+  },
+  "feedback-hub": {
+    "path": "../feedback-hub",
+    "css": "src/index.css",
+    "framework": "vite-tw4",
+    "theme": "@theme",
+    "extensions": [],
+    "port": 5180,
+    "label": "Feedback Hub"
+  },
+  "brane": {
+    "path": "../sanctuary-parc/brane",
+    "css": "src/index.css",
+    "framework": "vite-tw4",
+    "theme": "@theme",
+    "extensions": ["brane"],
+    "port": null,
+    "label": "Brane"
+  },
+  "meeting-notetaker": {
+    "path": "../meeting-notetaker/apps/dashboard",
+    "css": "src/app/globals.css",
+    "framework": "next-tw4",
+    "theme": "@theme inline",
+    "extensions": [],
+    "port": 3005,
+    "label": "Gravity Notes"
+  }
+}

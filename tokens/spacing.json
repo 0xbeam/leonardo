@@ -1,0 +1,18 @@
+{
+  "base": 4,
+  "unit": "px",
+  "scrollbar": {
+    "width": "4px",
+    "thumbRadius": "2px",
+    "thumbColor": "rgba(17, 17, 20, 0.15)",
+    "thumbHoverColor": "rgba(17, 17, 20, 0.3)"
+  },
+  "noise": {
+    "opacity": 0.018,
+    "size": "256px"
+  },
+  "focus": {
+    "outlineWidth": "2px",
+    "outlineOffset": "2px"
+  }
+}

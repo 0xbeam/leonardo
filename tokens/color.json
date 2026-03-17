@@ -1,0 +1,90 @@
+{
+  "brand": {
+    "--color-bg": "#FFFFFF",
+    "--color-surface": "#F6F5F2",
+    "--color-card": "#F6F5F2",
+    "--color-card-hover": "#EFEDE8",
+    "--color-text": "#111114",
+    "--color-text-secondary": "#888",
+    "--color-text-faint": "#aaa",
+    "--color-accent": "#2A7A5B",
+    "--color-accent-light": "#E8F5EE",
+    "--color-accent-dim": "#E8F5EE",
+    "--color-border": "#E8E5E0",
+    "--color-border-light": "#D8D5D0"
+  },
+  "semantic": {
+    "--color-foreground": "#111114",
+    "--color-background": "#FFFFFF",
+    "--color-card-border": "#E8E5E0",
+    "--color-success": "#2A7A5B",
+    "--color-warning": "#B8860B",
+    "--color-danger": "#C0392B",
+    "--color-muted": "#888"
+  },
+  "scales": {
+    "indigo": {
+      "--color-indigo-50": "#E8F5EE",
+      "--color-indigo-100": "#D1EBE0",
+      "--color-indigo-200": "#A3D7C1",
+      "--color-indigo-300": "#75C3A2",
+      "--color-indigo-400": "#3DA87A",
+      "--color-indigo-500": "#2A7A5B",
+      "--color-indigo-600": "#2A7A5B",
+      "--color-indigo-700": "#1F5F46",
+      "--color-indigo-800": "#164536",
+      "--color-indigo-900": "#0D2B22",
+      "--color-indigo-950": "#071A14"
+    },
+    "teal": {
+      "--color-teal-50": "#E8F5EE",
+      "--color-teal-100": "#D1EBE0",
+      "--color-teal-200": "#A3D7C1",
+      "--color-teal-300": "#75C3A2",
+      "--color-teal-400": "#3DA87A",
+      "--color-teal-500": "#2A7A5B",
+      "--color-teal-600": "#2A7A5B",
+      "--color-teal-700": "#1F5F46",
+      "--color-teal-800": "#164536",
+      "--color-teal-900": "#0D2B22"
+    },
+    "gray": {
+      "--color-gray-50": "#FAFAF8",
+      "--color-gray-100": "#F6F5F2",
+      "--color-gray-200": "#E8E5E0",
+      "--color-gray-300": "#D8D5D0",
+      "--color-gray-400": "#A3A39D",
+      "--color-gray-500": "#888",
+      "--color-gray-600": "#525250",
+      "--color-gray-700": "#40403D",
+      "--color-gray-800": "#262624",
+      "--color-gray-900": "#111114",
+      "--color-gray-950": "#0A0A09"
+    },
+    "stone": {
+      "--color-stone-50": "#FAFAF8",
+      "--color-stone-100": "#F6F5F2",
+      "--color-stone-200": "#E8E5E0",
+      "--color-stone-300": "#D8D5D0",
+      "--color-stone-400": "#A3A39D",
+      "--color-stone-500": "#888",
+      "--color-stone-600": "#525250",
+      "--color-stone-700": "#40403D",
+      "--color-stone-800": "#262624",
+      "--color-stone-900": "#111114",
+      "--color-stone-950": "#0A0A09"
+    },
+    "zinc": {
+      "--color-zinc-50": "#FAFAF8",
+      "--color-zinc-100": "#F6F5F2",
+      "--color-zinc-200": "#E8E5E0",
+      "--color-zinc-300": "#D8D5D0",
+      "--color-zinc-400": "#A3A39D",
+      "--color-zinc-500": "#888",
+      "--color-zinc-600": "#525250",
+      "--color-zinc-700": "#40403D",
+      "--color-zinc-800": "#262624",
+      "--color-zinc-900": "#111114"
+    }
+  }
+}
