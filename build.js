@@ -368,34 +368,34 @@ ${cssVars}
 
     /* ── Command Bar (the primary interface) ────────── */
     .command-bar {
-      display: flex; align-items: center; gap: 12px;
-      padding: 0 20px; height: 56px; min-height: 56px;
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 24px; height: 64px; min-height: 64px;
       border-bottom: 1px solid var(--color-border);
       background: var(--color-bg); z-index: 10;
     }
     .command-bar-brand {
-      font-family: var(--font-serif); font-size: 1.15rem; font-weight: 400;
-      letter-spacing: -0.02em; white-space: nowrap;
+      font-family: var(--font-serif); font-size: 1.2rem; font-weight: 400;
+      letter-spacing: -0.02em; white-space: nowrap; color: var(--color-accent);
     }
     .command-input-wrap {
       flex: 1; display: flex; align-items: center;
       background: var(--color-surface); border: 1px solid var(--color-border);
-      border-radius: 10px; padding: 0 14px; height: 38px;
-      transition: border-color 0.15s ease;
+      border-radius: 12px; padding: 0 16px; height: 42px;
+      transition: border-color 0.2s var(--ease-smooth), box-shadow 0.2s var(--ease-smooth);
     }
-    .command-input-wrap:focus-within { border-color: var(--color-accent); }
-    .command-input-wrap .icon { color: var(--color-text-faint); margin-right: 10px; font-size: 14px; }
+    .command-input-wrap:focus-within { border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-light); }
+    .command-input-wrap svg { color: var(--color-text-faint); margin-right: 12px; flex-shrink: 0; }
     .command-input {
       flex: 1; border: none; background: none; outline: none;
       font-family: var(--font-body); font-size: 14px; color: var(--color-text);
     }
-    .command-input::placeholder { color: var(--color-text-faint); }
+    .command-input::placeholder { color: var(--color-text-faint); transition: opacity 0.3s ease; }
     .command-hint {
       font-family: var(--font-mono); font-size: 10px; color: var(--color-text-faint);
-      padding: 2px 6px; background: var(--color-bg); border-radius: 4px;
-      border: 1px solid var(--color-border);
+      padding: 3px 8px; background: var(--color-bg); border-radius: 5px;
+      border: 1px solid var(--color-border); white-space: nowrap;
     }
-    .bar-actions { display: flex; gap: 6px; }
+    .bar-actions { display: flex; gap: 8px; }
     .btn {
       font-family: var(--font-mono); font-size: 10px;
       text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
@@ -413,29 +413,31 @@ ${cssVars}
 
     /* Left: Navigation */
     .nav {
-      width: 52px; min-width: 52px; border-right: 1px solid var(--color-border);
+      width: 56px; min-width: 56px; border-right: 1px solid var(--color-border);
       display: flex; flex-direction: column; align-items: center;
-      padding: 12px 0; gap: 4px; background: var(--color-bg);
+      padding: 14px 0; gap: 2px; background: var(--color-bg);
     }
     .nav-btn {
-      width: 36px; height: 36px; border-radius: 8px; border: none;
+      width: 40px; height: 40px; border-radius: 10px; border: none;
       background: none; cursor: pointer; display: flex; align-items: center;
-      justify-content: center; font-size: 16px; color: var(--color-text-secondary);
-      transition: all 0.12s ease; position: relative;
+      justify-content: center; color: var(--color-text-secondary);
+      transition: all 0.15s var(--ease-smooth); position: relative;
     }
+    .nav-btn svg { width: 18px; height: 18px; stroke-width: 1.5; }
     .nav-btn:hover { background: var(--color-surface); color: var(--color-text); }
     .nav-btn.active { background: var(--color-accent-light); color: var(--color-accent); }
     .nav-btn .tip {
-      display: none; position: absolute; left: 48px; top: 50%; transform: translateY(-50%);
+      display: none; position: absolute; left: 52px; top: 50%; transform: translateY(-50%);
       font-family: var(--font-mono); font-size: 10px; white-space: nowrap;
-      background: var(--color-text); color: var(--color-bg); padding: 3px 8px;
-      border-radius: 4px; pointer-events: none; z-index: 20;
+      background: var(--color-text); color: var(--color-bg); padding: 4px 10px;
+      border-radius: 6px; pointer-events: none; z-index: 20;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
     }
     .nav-btn:hover .tip { display: block; }
-    .nav-sep { width: 24px; height: 1px; background: var(--color-border); margin: 6px 0; }
+    .nav-sep { width: 28px; height: 1px; background: var(--color-border); margin: 6px 0; }
 
     /* Center: Canvas */
-    .canvas { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+    .canvas { flex: 1; overflow-y: auto; padding: 40px 48px 80px; }
     .panel { display: none; }
     .panel.active { display: block; }
     .panel-title {
@@ -505,8 +507,9 @@ ${cssVars}
     .scale-chip-label { font-family: var(--font-mono); font-size: 8px; color: var(--color-text-faint); }
 
     /* ── Component Cards ────────────────────────────── */
-    .comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-    .comp-card { border: 1px solid var(--color-border); border-radius: 10px; padding: 20px; }
+    .comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .comp-card { border: 1px solid var(--color-border); border-radius: 12px; padding: 24px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+    .comp-card:hover { border-color: var(--color-border-light); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
     .comp-card-title {
       font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
       letter-spacing: 0.06em; color: var(--color-text-faint); margin-bottom: 14px;
@@ -597,9 +600,9 @@ ${cssVars}
   <div class="command-bar">
     <div class="command-bar-brand">Leonardo</div>
     <div class="command-input-wrap">
-      <span class="icon">\u2318</span>
-      <input class="command-input" id="cmdInput" placeholder="set accent to #3B82F6 \u2022 pull all \u2022 push \u2022 build \u2022 create component\u2026" autofocus />
-      <span class="command-hint">\u21B5</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="command-input" id="cmdInput" placeholder="set accent to #3B82F6" autofocus />
+      <span class="command-hint">\u2318K</span>
     </div>
     <div class="bar-actions">
       <button class="btn" onclick="saveTokens()">Save</button>
@@ -610,14 +613,14 @@ ${cssVars}
   <div class="body-wrap">
     <!-- Icon Nav -->
     <div class="nav">
-      <button class="nav-btn active" data-panel="canvas" title="Canvas"><span class="tip">Canvas</span>\u25A0</button>
-      <button class="nav-btn" data-panel="colors" title="Colors"><span class="tip">Colors</span>\u25CF</button>
-      <button class="nav-btn" data-panel="type" title="Typography"><span class="tip">Type</span>Aa</button>
-      <button class="nav-btn" data-panel="motion" title="Motion"><span class="tip">Motion</span>\u279C</button>
+      <button class="nav-btn active" data-panel="canvas" title="Canvas"><span class="tip">Canvas</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+      <button class="nav-btn" data-panel="colors" title="Colors"><span class="tip">Colors</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.3"/></svg></button>
+      <button class="nav-btn" data-panel="type" title="Typography"><span class="tip">Type</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></button>
+      <button class="nav-btn" data-panel="motion" title="Motion"><span class="tip">Motion</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
       <div class="nav-sep"></div>
-      <button class="nav-btn" data-panel="create" title="Create"><span class="tip">Create</span>+</button>
+      <button class="nav-btn" data-panel="create" title="Create"><span class="tip">Create</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg></button>
       <div class="nav-sep"></div>
-      <button class="nav-btn" data-panel="apps" title="Apps"><span class="tip">Apps</span>\u26A1</button>
+      <button class="nav-btn" data-panel="apps" title="Apps"><span class="tip">Apps</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></button>
     </div>
 
     <!-- Canvas -->
@@ -988,6 +991,34 @@ async function loadCustomComponents() {
   } catch (e) { container.innerHTML = '<div style="font-size:12px;color:var(--color-text-faint)">Run <code>node server.js</code> locally for full features.</div>'; }
 }
 
+// ── Cycling Placeholder ─────────────────────────────────
+const hints = [
+  'set accent to #3B82F6',
+  'change body font to Inter',
+  'pull all',
+  'push',
+  'build',
+  'status',
+  'set bg to #0D1117',
+  'set surface to #161B22',
+];
+let hintIdx = 0;
+const cmdInput = document.getElementById('cmdInput');
+setInterval(() => {
+  if (document.activeElement === cmdInput && cmdInput.value) return;
+  hintIdx = (hintIdx + 1) % hints.length;
+  cmdInput.placeholder = hints[hintIdx];
+}, 3000);
+
+// ── Keyboard shortcut ───────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    cmdInput.focus();
+    cmdInput.select();
+  }
+});
+
 // ── Init ───────────────────────────────────────────────
 renderColorGrid('brand-colors', STATE.tokens.color.brand, 'brand');
 renderColorGrid('semantic-colors', STATE.tokens.color.semantic, 'semantic');
@@ -995,6 +1026,7 @@ renderScale('accent-scale', STATE.tokens.color.scales.indigo);
 renderScale('gray-scale', STATE.tokens.color.scales.gray);
 renderTypeScale();
 loadCustomComponents();
+log('Try: <strong>set accent to #3B82F6</strong> or <strong>pull all</strong>');
 </script>
 </body>
 </html>`;
