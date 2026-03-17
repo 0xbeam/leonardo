@@ -188,5 +188,5 @@ All three Tailwind gray families map to the same warm neutral scale:
 
 ---
 
-*Generated from gravity-core tokens. Source of truth: `gravity-core/tokens/*.json`*
-*Push changes: `node gravity-core/build.js --push`*
+*Generated from leonardo tokens. Source of truth: `leonardo/tokens/*.json`*
+*Push changes: `node leonardo/build.js --push`*

@@ -15,7 +15,7 @@ ADR-style records of design system decisions.
 
 **Date:** 2026-03-17
 **Decision:** Use `/* GRAVITY-START */` / `/* GRAVITY-END */` markers in app CSS
-**Rationale:** Apps keep app-specific CSS outside the markers. gravity-core owns only the fenced section. This preserves flexibility while ensuring single source of truth.
+**Rationale:** Apps keep app-specific CSS outside the markers. leonardo owns only the fenced section. This preserves flexibility while ensuring single source of truth.
 **Alternatives considered:** Full file replacement (too aggressive), npm package import (too much ceremony for sibling dirs)
 
 ## DEC-003: Brane as extension, not fork

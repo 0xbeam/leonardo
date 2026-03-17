@@ -34,5 +34,14 @@
     "extensions": [],
     "port": 3005,
     "label": "Gravity Notes"
+  },
+  "mirofish": {
+    "path": "../mirofish/frontend",
+    "css": "src/index.css",
+    "framework": "vite-tw4",
+    "theme": "@theme",
+    "extensions": [],
+    "port": 3000,
+    "label": "MiroFish"
   }
 }

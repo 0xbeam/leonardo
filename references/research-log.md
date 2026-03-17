@@ -6,7 +6,7 @@ Append-only log of design research sessions across all Gravity apps.
 
 ## 2026-03-17 — Initial System Extraction
 
-**Context:** Extracted Gravity design system from 4 apps into gravity-core canonical source.
+**Context:** Extracted Gravity design system from 4 apps into leonardo canonical source.
 
 **Key observations:**
 - All 4 apps share the same editorial-minimal DNA: forest green, warm neutrals, serif/sans/mono trio
