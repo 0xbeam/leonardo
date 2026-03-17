@@ -344,7 +344,7 @@ function buildIndex() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leonardo — Design Workbench</title>
+  <title>Leonardo \u2014 Design OS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="${typography.fonts.import}" rel="stylesheet">
   <style>
@@ -363,558 +363,414 @@ ${cssVars}
     }
     code, .mono { font-family: var(--font-mono); }
 
-    /* ── Layout ─────────────────────────────────────── */
+    /* ── Layout Shell ───────────────────────────────── */
     .shell { display: flex; flex-direction: column; height: 100vh; }
-    .topbar {
+
+    /* ── Command Bar (the primary interface) ────────── */
+    .command-bar {
       display: flex; align-items: center; gap: 12px;
-      padding: 0 20px; height: 52px; min-height: 52px;
+      padding: 0 20px; height: 56px; min-height: 56px;
       border-bottom: 1px solid var(--color-border);
-      background: var(--color-bg);
-      z-index: 10;
+      background: var(--color-bg); z-index: 10;
     }
-    .topbar-brand {
-      font-family: var(--font-serif);
-      font-size: 1.15rem; font-weight: 400;
-      letter-spacing: -0.02em;
-      color: var(--color-text);
-      white-space: nowrap;
+    .command-bar-brand {
+      font-family: var(--font-serif); font-size: 1.15rem; font-weight: 400;
+      letter-spacing: -0.02em; white-space: nowrap;
     }
-    .agent-bar {
+    .command-input-wrap {
       flex: 1; display: flex; align-items: center;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 8px; padding: 0 12px; height: 34px;
-      margin: 0 8px;
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: 10px; padding: 0 14px; height: 38px;
+      transition: border-color 0.15s ease;
     }
-    .agent-bar-icon { color: var(--color-text-secondary); font-size: 13px; margin-right: 8px; }
-    .agent-bar input {
+    .command-input-wrap:focus-within { border-color: var(--color-accent); }
+    .command-input-wrap .icon { color: var(--color-text-faint); margin-right: 10px; font-size: 14px; }
+    .command-input {
       flex: 1; border: none; background: none; outline: none;
-      font-family: var(--font-body); font-size: 13px;
-      color: var(--color-text);
+      font-family: var(--font-body); font-size: 14px; color: var(--color-text);
     }
-    .agent-bar input::placeholder { color: var(--color-text-faint); }
-    .topbar-actions { display: flex; gap: 6px; }
-    .topbar-btn {
+    .command-input::placeholder { color: var(--color-text-faint); }
+    .command-hint {
+      font-family: var(--font-mono); font-size: 10px; color: var(--color-text-faint);
+      padding: 2px 6px; background: var(--color-bg); border-radius: 4px;
+      border: 1px solid var(--color-border);
+    }
+    .bar-actions { display: flex; gap: 6px; }
+    .btn {
       font-family: var(--font-mono); font-size: 10px;
       text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
-      padding: 6px 12px; border-radius: 6px; border: 1px solid var(--color-border);
+      padding: 7px 14px; border-radius: 7px; border: 1px solid var(--color-border);
       background: var(--color-bg); color: var(--color-text-secondary);
       cursor: pointer; transition: all 0.15s ease; white-space: nowrap;
     }
-    .topbar-btn:hover { background: var(--color-surface); color: var(--color-text); }
-    .topbar-btn.primary {
-      background: var(--color-accent); color: #fff; border-color: var(--color-accent);
-    }
-    .topbar-btn.primary:hover { opacity: 0.9; }
-    .topbar-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn:hover { background: var(--color-surface); color: var(--color-text); }
+    .btn.primary { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+    .btn.primary:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .body { display: flex; flex: 1; overflow: hidden; }
+    /* ── Three-Column Body ──────────────────────────── */
+    .body-wrap { display: flex; flex: 1; overflow: hidden; }
 
-    /* ── Sidebar ────────────────────────────────────── */
-    .sidebar {
-      width: 180px; min-width: 180px;
-      border-right: 1px solid var(--color-border);
-      padding: 16px 0; overflow-y: auto;
-      background: var(--color-bg);
+    /* Left: Navigation */
+    .nav {
+      width: 52px; min-width: 52px; border-right: 1px solid var(--color-border);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 12px 0; gap: 4px; background: var(--color-bg);
     }
-    .sidebar-section {
-      font-family: var(--font-mono); font-size: 9px;
-      text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;
-      color: var(--color-text-faint); padding: 12px 20px 6px;
+    .nav-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: none;
+      background: none; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; color: var(--color-text-secondary);
+      transition: all 0.12s ease; position: relative;
     }
-    .sidebar-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 7px 20px; font-size: 13px; color: var(--color-text-secondary);
-      cursor: pointer; transition: all 0.12s ease;
-      border-left: 2px solid transparent;
+    .nav-btn:hover { background: var(--color-surface); color: var(--color-text); }
+    .nav-btn.active { background: var(--color-accent-light); color: var(--color-accent); }
+    .nav-btn .tip {
+      display: none; position: absolute; left: 48px; top: 50%; transform: translateY(-50%);
+      font-family: var(--font-mono); font-size: 10px; white-space: nowrap;
+      background: var(--color-text); color: var(--color-bg); padding: 3px 8px;
+      border-radius: 4px; pointer-events: none; z-index: 20;
     }
-    .sidebar-item:hover { color: var(--color-text); background: var(--color-surface); }
-    .sidebar-item.active {
-      color: var(--color-accent); background: var(--color-accent-light);
-      border-left-color: var(--color-accent); font-weight: 500;
-    }
-    .sidebar-icon { width: 16px; text-align: center; font-size: 14px; }
+    .nav-btn:hover .tip { display: block; }
+    .nav-sep { width: 24px; height: 1px; background: var(--color-border); margin: 6px 0; }
 
-    /* ── Main Panel ─────────────────────────────────── */
-    .main { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+    /* Center: Canvas */
+    .canvas { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
     .panel { display: none; }
     .panel.active { display: block; }
     .panel-title {
-      font-family: var(--font-serif);
-      font-size: clamp(1.3rem, 1.3rem + 0.4vw, 1.6rem);
-      font-weight: 400; letter-spacing: -0.02em;
-      margin-bottom: 8px;
+      font-family: var(--font-serif); font-size: clamp(1.4rem, 1.3rem + 0.5vw, 1.8rem);
+      font-weight: 400; letter-spacing: -0.02em; margin-bottom: 6px;
     }
-    .panel-desc {
+    .panel-sub {
       font-size: 13px; color: var(--color-text-secondary);
-      margin-bottom: 32px; max-width: 560px; line-height: 1.6;
+      margin-bottom: 28px; max-width: 600px; line-height: 1.6;
     }
-    .section-label {
+    .label {
       font-family: var(--font-mono); font-size: 10px;
       text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
-      color: var(--color-text-secondary); margin: 32px 0 12px;
+      color: var(--color-text-secondary); margin: 28px 0 10px;
     }
-    .section-label:first-child { margin-top: 0; }
+    .label:first-child { margin-top: 0; }
+
+    /* Right: Activity Feed */
+    .activity {
+      width: 280px; min-width: 280px; border-left: 1px solid var(--color-border);
+      display: flex; flex-direction: column; background: var(--color-bg);
+    }
+    .activity-header {
+      font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.06em; font-weight: 500; color: var(--color-text-faint);
+      padding: 14px 16px 10px; border-bottom: 1px solid var(--color-border);
+    }
+    .activity-feed { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .activity-item {
+      padding: 10px 16px; font-size: 12px; border-bottom: 1px solid rgba(0,0,0,0.03);
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .activity-item .time {
+      font-family: var(--font-mono); font-size: 9px; color: var(--color-text-faint);
+      margin-bottom: 2px;
+    }
+    .activity-item .msg { color: var(--color-text-secondary); line-height: 1.5; }
+    .activity-item .msg strong { color: var(--color-text); font-weight: 500; }
+    .activity-item.success .msg { color: var(--color-success); }
+    .activity-item.error .msg { color: var(--color-danger); }
 
     /* ── Token Editors ──────────────────────────────── */
-    .token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+    .token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
     .token-row {
       display: flex; align-items: center; gap: 10px;
-      padding: 8px 12px; border-radius: 8px;
-      border: 1px solid var(--color-border);
-      background: var(--color-bg);
-      transition: border-color 0.15s ease;
+      padding: 7px 10px; border-radius: 8px; border: 1px solid var(--color-border);
+      background: var(--color-bg); transition: border-color 0.15s ease;
     }
     .token-row:hover { border-color: var(--color-border-light); }
     .token-swatch {
-      width: 28px; height: 28px; border-radius: 6px;
+      width: 26px; height: 26px; border-radius: 6px;
       border: 1px solid rgba(0,0,0,0.08); cursor: pointer;
       position: relative; flex-shrink: 0;
     }
     .token-swatch input[type="color"] {
-      position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%;
-      cursor: pointer; border: none;
+      position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; border: none;
     }
     .token-info { flex: 1; min-width: 0; }
-    .token-name {
-      font-size: 12px; font-weight: 500; color: var(--color-text);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .token-value {
-      font-family: var(--font-mono); font-size: 11px;
-      color: var(--color-text-secondary);
-    }
+    .token-name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .token-value { font-family: var(--font-mono); font-size: 10px; color: var(--color-text-secondary); }
 
-    /* ── Scale Row ──────────────────────────────────── */
-    .scale-strip { display: flex; gap: 3px; margin-bottom: 16px; }
-    .scale-chip {
-      flex: 1; text-align: center; cursor: pointer;
-      position: relative;
-    }
-    .scale-chip-swatch {
-      height: 36px; border-radius: 6px; margin-bottom: 3px;
-      border: 1px solid rgba(0,0,0,0.04);
-      position: relative;
-    }
-    .scale-chip-swatch input[type="color"] {
-      position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;
-    }
-    .scale-chip-label {
-      font-family: var(--font-mono); font-size: 9px; color: var(--color-text-faint);
-    }
+    .scale-strip { display: flex; gap: 2px; margin-bottom: 12px; }
+    .scale-chip { flex: 1; text-align: center; cursor: pointer; }
+    .scale-chip-swatch { height: 32px; border-radius: 6px; margin-bottom: 2px; border: 1px solid rgba(0,0,0,0.04); position: relative; }
+    .scale-chip-swatch input[type="color"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+    .scale-chip-label { font-family: var(--font-mono); font-size: 8px; color: var(--color-text-faint); }
 
-    /* ── Typography Editor ──────────────────────────── */
-    .type-preview {
-      padding: 12px 0; border-bottom: 1px solid var(--color-border);
-      display: flex; align-items: baseline; gap: 16px;
-    }
-    .type-preview:last-child { border-bottom: none; }
-    .type-label {
-      font-family: var(--font-mono); font-size: 10px;
-      color: var(--color-text-faint); width: 40px; flex-shrink: 0;
-    }
-    .type-sample { line-height: 1.3; color: var(--color-text); }
-    .font-card {
-      padding: 20px; border: 1px solid var(--color-border);
-      border-radius: 10px; margin-bottom: 10px;
-    }
-    .font-card-label {
-      font-family: var(--font-mono); font-size: 10px;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      color: var(--color-text-faint); margin-bottom: 8px;
-    }
-
-    /* ── Component Gallery ──────────────────────────── */
-    .comp-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-    }
-    .comp-card {
-      border: 1px solid var(--color-border); border-radius: 10px;
-      padding: 24px; background: var(--color-bg);
-    }
+    /* ── Component Cards ────────────────────────────── */
+    .comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .comp-card { border: 1px solid var(--color-border); border-radius: 10px; padding: 20px; }
     .comp-card-title {
-      font-family: var(--font-mono); font-size: 10px;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      color: var(--color-text-faint); margin-bottom: 16px;
+      font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--color-text-faint); margin-bottom: 14px;
     }
     .comp-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .comp-row + .comp-row { margin-top: 12px; }
+    .comp-row + .comp-row { margin-top: 10px; }
 
-    /* Component preview styles */
-    .preview-btn {
-      font-family: var(--font-body); font-size: 13px; font-weight: 500;
-      padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .preview-btn.primary { background: var(--color-accent); color: #fff; }
-    .preview-btn.primary:hover { opacity: 0.9; }
-    .preview-btn.secondary {
-      background: var(--color-bg); color: var(--color-text);
-      border: 1px solid var(--color-border);
-    }
-    .preview-btn.secondary:hover { background: var(--color-surface); }
-    .preview-btn.ghost {
-      background: none; color: var(--color-accent); padding: 8px 12px;
-    }
-    .preview-btn.ghost:hover { background: var(--color-accent-light); }
-    .preview-btn.sm { font-size: 12px; padding: 5px 12px; border-radius: 6px; }
-    .preview-btn.danger { background: var(--color-danger); color: #fff; }
+    /* Preview components */
+    .p-btn { font-family: var(--font-body); font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.15s ease; }
+    .p-btn.primary { background: var(--color-accent); color: #fff; }
+    .p-btn.secondary { background: var(--color-bg); color: var(--color-text); border: 1px solid var(--color-border); }
+    .p-btn.ghost { background: none; color: var(--color-accent); }
+    .p-btn.sm { font-size: 12px; padding: 5px 12px; border-radius: 6px; }
+    .p-btn.danger { background: var(--color-danger); color: #fff; }
+    .p-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 18px; width: 100%; }
+    .p-card h4 { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .p-card p { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
+    .p-input { font-family: var(--font-body); font-size: 13px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text); width: 100%; outline: none; }
+    .p-input:focus { border-color: var(--color-accent); }
+    .p-badge { display: inline-block; font-family: var(--font-mono); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 4px; }
+    .p-badge.accent { background: var(--color-accent-light); color: var(--color-accent); }
+    .p-badge.success { background: #E8F5EE; color: var(--color-success); }
+    .p-badge.warning { background: #FEF3CD; color: var(--color-warning); }
+    .p-badge.danger { background: #FDE8E8; color: var(--color-danger); }
+    .p-alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; width: 100%; }
+    .p-alert.success { background: #E8F5EE; color: var(--color-success); border: 1px solid #A3D7C1; }
+    .p-alert.warning { background: #FEF3CD; color: var(--color-warning); border: 1px solid #F5D77B; }
+    .p-alert.danger { background: #FDE8E8; color: var(--color-danger); border: 1px solid #F0A0A0; }
+    .p-toggle { width: 40px; height: 22px; border-radius: 11px; background: var(--color-border); cursor: pointer; position: relative; transition: background 0.2s ease; }
+    .p-toggle.on { background: var(--color-accent); }
+    .p-toggle-knob { width: 18px; height: 18px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: transform 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+    .p-toggle.on .p-toggle-knob { transform: translateX(18px); }
 
-    .preview-card {
-      background: var(--color-surface); border: 1px solid var(--color-border);
-      border-radius: 10px; padding: 20px; width: 100%;
+    /* ── Create Panel ───────────────────────────────── */
+    .create-form { display: grid; gap: 12px; max-width: 640px; }
+    .create-field label {
+      display: block; font-family: var(--font-mono); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-secondary);
+      margin-bottom: 4px;
     }
-    .preview-card-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-    .preview-card-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
-
-    .preview-input {
-      font-family: var(--font-body); font-size: 13px;
-      padding: 8px 12px; border-radius: 8px;
-      border: 1px solid var(--color-border);
-      background: var(--color-bg); color: var(--color-text);
-      width: 100%; outline: none; transition: border-color 0.15s ease;
+    .create-field input, .create-field textarea {
+      width: 100%; font-family: var(--font-mono); font-size: 13px;
+      padding: 10px 12px; border-radius: 8px; border: 1px solid var(--color-border);
+      background: var(--color-bg); color: var(--color-text); outline: none;
+      transition: border-color 0.15s ease;
     }
-    .preview-input:focus { border-color: var(--color-accent); }
-    .preview-input::placeholder { color: var(--color-text-faint); }
-
-    .preview-badge {
-      display: inline-block; font-family: var(--font-mono);
-      font-size: 10px; font-weight: 500; text-transform: uppercase;
-      letter-spacing: 0.06em; padding: 3px 8px; border-radius: 4px;
+    .create-field input:focus, .create-field textarea:focus { border-color: var(--color-accent); }
+    .create-field textarea { min-height: 120px; resize: vertical; font-size: 12px; }
+    .create-preview {
+      border: 1px solid var(--color-border); border-radius: 10px;
+      padding: 24px; background: var(--color-surface); min-height: 100px;
     }
-    .preview-badge.accent { background: var(--color-accent-light); color: var(--color-accent); }
-    .preview-badge.success { background: #E8F5EE; color: var(--color-success); }
-    .preview-badge.warning { background: #FEF3CD; color: var(--color-warning); }
-    .preview-badge.danger { background: #FDE8E8; color: var(--color-danger); }
-    .preview-badge.neutral { background: var(--color-surface); color: var(--color-text-secondary); }
-
-    .preview-alert {
-      padding: 12px 16px; border-radius: 8px; font-size: 13px;
-      display: flex; align-items: center; gap: 8px; width: 100%;
-    }
-    .preview-alert.success { background: #E8F5EE; color: var(--color-success); border: 1px solid #A3D7C1; }
-    .preview-alert.warning { background: #FEF3CD; color: var(--color-warning); border: 1px solid #F5D77B; }
-    .preview-alert.danger { background: #FDE8E8; color: var(--color-danger); border: 1px solid #F0A0A0; }
-
-    .preview-toggle {
-      width: 40px; height: 22px; border-radius: 11px;
-      background: var(--color-border); cursor: pointer;
-      position: relative; transition: background 0.2s ease;
-    }
-    .preview-toggle.on { background: var(--color-accent); }
-    .preview-toggle-knob {
-      width: 18px; height: 18px; border-radius: 50%;
-      background: #fff; position: absolute; top: 2px; left: 2px;
-      transition: transform 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-    }
-    .preview-toggle.on .preview-toggle-knob { transform: translateX(18px); }
-
-    .preview-table { width: 100%; border-collapse: collapse; }
-    .preview-table th {
-      font-family: var(--font-mono); font-size: 10px;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      color: var(--color-text-faint); text-align: left;
-      padding: 8px 12px; border-bottom: 1px solid var(--color-border);
-    }
-    .preview-table td {
-      font-size: 13px; padding: 10px 12px;
-      border-bottom: 1px solid var(--color-border);
-      color: var(--color-text);
-    }
-    .preview-table tr { transition: background 0.15s ease; }
-    .preview-table tbody tr:hover { background: rgba(42,122,91,0.03); }
 
     /* ── Apps Panel ─────────────────────────────────── */
     .app-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px; border: 1px solid var(--color-border);
-      border-radius: 10px; margin-bottom: 8px;
-      transition: border-color 0.15s ease;
+      padding: 12px 14px; border: 1px solid var(--color-border);
+      border-radius: 10px; margin-bottom: 6px;
     }
     .app-row:hover { border-color: var(--color-border-light); }
-    .app-name { font-weight: 500; font-size: 14px; }
-    .app-meta {
-      font-family: var(--font-mono); font-size: 11px;
-      color: var(--color-text-secondary); margin-left: 8px;
-    }
-    .app-actions { display: flex; gap: 6px; align-items: center; }
-    .app-status {
-      font-family: var(--font-mono); font-size: 10px;
-      color: var(--color-text-faint); margin-right: 8px;
-    }
+    .app-name { font-weight: 500; font-size: 13px; }
+    .app-meta { font-family: var(--font-mono); font-size: 10px; color: var(--color-text-secondary); margin-left: 8px; }
+    .app-status { font-family: var(--font-mono); font-size: 10px; color: var(--color-text-faint); margin-right: 8px; }
 
     /* ── Toast ──────────────────────────────────────── */
     .toast {
-      position: fixed; bottom: 24px; right: 24px;
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px);
       background: var(--color-text); color: var(--color-bg);
-      font-size: 13px; padding: 10px 20px; border-radius: 8px;
-      opacity: 0; transform: translateY(8px);
-      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-      pointer-events: none; z-index: 100;
-      font-family: var(--font-body);
+      font-size: 13px; padding: 10px 24px; border-radius: 10px;
+      opacity: 0; transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none; z-index: 100; font-family: var(--font-body);
     }
-    .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
 
-    /* ── Responsive ─────────────────────────────────── */
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .main { padding: 24px 16px 80px; }
-      .comp-grid { grid-template-columns: 1fr; }
-      .token-grid { grid-template-columns: 1fr; }
+    @media (max-width: 900px) {
+      .activity { display: none; }
+      .canvas { padding: 24px 16px 80px; }
+    }
+    @media (max-width: 600px) {
+      .nav { width: 44px; min-width: 44px; }
+      .nav-btn { width: 32px; height: 32px; }
     }
   </style>
 </head>
 <body>
 <div class="shell">
-  <!-- Top Bar -->
-  <div class="topbar">
-    <div class="topbar-brand">Leonardo</div>
-    <div class="agent-bar">
-      <span class="agent-bar-icon">\u2318</span>
-      <input type="text" id="agentInput" placeholder="Describe a change\u2026 \u201cmake accent warmer\u201d, \u201cadd a tooltip component\u201d" />
+  <!-- Command Bar -->
+  <div class="command-bar">
+    <div class="command-bar-brand">Leonardo</div>
+    <div class="command-input-wrap">
+      <span class="icon">\u2318</span>
+      <input class="command-input" id="cmdInput" placeholder="set accent to #3B82F6 \u2022 pull all \u2022 push \u2022 build \u2022 create component\u2026" autofocus />
+      <span class="command-hint">\u21B5</span>
     </div>
-    <div class="topbar-actions">
-      <button class="topbar-btn" onclick="saveTokens()">Save</button>
-      <button class="topbar-btn primary" onclick="pushAll()">Push All</button>
+    <div class="bar-actions">
+      <button class="btn" onclick="saveTokens()">Save</button>
+      <button class="btn primary" onclick="agentCmd('push')">Push All</button>
     </div>
   </div>
 
-  <div class="body">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="sidebar-section">Tokens</div>
-      <div class="sidebar-item active" data-panel="colors">
-        <span class="sidebar-icon">\u25CF</span> Colors
-      </div>
-      <div class="sidebar-item" data-panel="typography">
-        <span class="sidebar-icon">Aa</span> Typography
-      </div>
-      <div class="sidebar-item" data-panel="spacing">
-        <span class="sidebar-icon">\u2506</span> Spacing
-      </div>
-      <div class="sidebar-item" data-panel="motion">
-        <span class="sidebar-icon">\u279C</span> Motion
-      </div>
-      <div class="sidebar-section">Preview</div>
-      <div class="sidebar-item" data-panel="components">
-        <span class="sidebar-icon">\u25A1</span> Components
-      </div>
-      <div class="sidebar-section">System</div>
-      <div class="sidebar-item" data-panel="apps">
-        <span class="sidebar-icon">\u26A1</span> Apps
-      </div>
-      <div class="sidebar-item" data-panel="assets">
-        <span class="sidebar-icon">\u2193</span> Assets
-      </div>
+  <div class="body-wrap">
+    <!-- Icon Nav -->
+    <div class="nav">
+      <button class="nav-btn active" data-panel="canvas" title="Canvas"><span class="tip">Canvas</span>\u25A0</button>
+      <button class="nav-btn" data-panel="colors" title="Colors"><span class="tip">Colors</span>\u25CF</button>
+      <button class="nav-btn" data-panel="type" title="Typography"><span class="tip">Type</span>Aa</button>
+      <button class="nav-btn" data-panel="motion" title="Motion"><span class="tip">Motion</span>\u279C</button>
+      <div class="nav-sep"></div>
+      <button class="nav-btn" data-panel="create" title="Create"><span class="tip">Create</span>+</button>
+      <div class="nav-sep"></div>
+      <button class="nav-btn" data-panel="apps" title="Apps"><span class="tip">Apps</span>\u26A1</button>
     </div>
 
-    <!-- Main -->
-    <div class="main">
-
-      <!-- COLORS PANEL -->
-      <div id="panel-colors" class="panel active">
-        <div class="panel-title">Colors</div>
-        <div class="panel-desc">Edit brand colors and scales. Changes update the component previews in real-time.</div>
-
-        <div class="section-label">Brand</div>
-        <div class="token-grid" id="brand-colors"></div>
-
-        <div class="section-label">Semantic</div>
-        <div class="token-grid" id="semantic-colors"></div>
-
-        <div class="section-label">Accent Scale</div>
-        <div class="scale-strip" id="accent-scale"></div>
-
-        <div class="section-label">Gray Scale</div>
-        <div class="scale-strip" id="gray-scale"></div>
-      </div>
-
-      <!-- TYPOGRAPHY PANEL -->
-      <div id="panel-typography" class="panel">
-        <div class="panel-title">Typography</div>
-        <div class="panel-desc">Font families, type scale, and weight system.</div>
-
-        <div class="section-label">Font Families</div>
-        <div class="font-card">
-          <div class="font-card-label">Display / Headings</div>
-          <div style="font-family:var(--font-serif);font-size:clamp(1.6rem,1.5rem + 0.8vw,2rem);font-weight:400;letter-spacing:-0.02em">Cormorant Garamond</div>
-        </div>
-        <div class="font-card">
-          <div class="font-card-label">Body / UI</div>
-          <div style="font-family:var(--font-body);font-size:14px">DM Sans \u2014 The quick brown fox jumps over the lazy dog. 0123456789</div>
-        </div>
-        <div class="font-card">
-          <div class="font-card-label">Labels / Code</div>
-          <div style="font-family:var(--font-mono);font-size:12px">DM Mono \u2014 The quick brown fox jumps over the lazy dog. 0123456789</div>
-        </div>
-
-        <div class="section-label">Type Scale</div>
-        <div id="type-scale"></div>
-      </div>
-
-      <!-- SPACING PANEL -->
-      <div id="panel-spacing" class="panel">
-        <div class="panel-title">Spacing</div>
-        <div class="panel-desc">Base unit and spacing scale. All spacing derives from ${spacing.base}${spacing.unit} base.</div>
-        <div class="section-label">Scale</div>
-        <div style="display:flex;gap:4px;align-items:flex-end">
-          ${[1,2,3,4,6,8,12,16,24,32].map(m => {
-            const px = spacing.base * m;
-            return `<div style="text-align:center">
-              <div style="width:${Math.min(px, 80)}px;height:${Math.min(px, 80)}px;background:var(--color-accent-light);border:1px solid var(--color-accent);border-radius:4px;margin:0 auto 4px"></div>
-              <span style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-faint)">${px}</span>
-            </div>`;
-          }).join('')}
-        </div>
-        <div class="section-label">Scrollbar</div>
-        <div class="token-grid">
-          <div class="token-row"><div class="token-info"><div class="token-name">Width</div><div class="token-value">${spacing.scrollbar.width}</div></div></div>
-          <div class="token-row"><div class="token-info"><div class="token-name">Thumb Radius</div><div class="token-value">${spacing.scrollbar.thumbRadius}</div></div></div>
-        </div>
-        <div class="section-label">Focus Ring</div>
-        <div class="token-grid">
-          <div class="token-row"><div class="token-info"><div class="token-name">Outline Width</div><div class="token-value">${spacing.focus.outlineWidth}</div></div></div>
-          <div class="token-row"><div class="token-info"><div class="token-name">Outline Offset</div><div class="token-value">${spacing.focus.outlineOffset}</div></div></div>
-        </div>
-      </div>
-
-      <!-- MOTION PANEL -->
-      <div id="panel-motion" class="panel">
-        <div class="panel-title">Motion</div>
-        <div class="panel-desc">Easing curves, keyframe animations, and transitions.</div>
-        <div class="section-label">Easing</div>
-        <div class="token-grid">
-          ${Object.entries(motion.easing).map(([k, v]) => `
-            <div class="token-row">
-              <div class="token-info"><div class="token-name">${k.replace('--','')}</div><div class="token-value">${v}</div></div>
-            </div>`).join('')}
-        </div>
-        <div class="section-label">Transitions</div>
-        <div class="token-grid">
-          ${Object.entries(motion.transitions).map(([k, v]) => `
-            <div class="token-row">
-              <div class="token-info"><div class="token-name">${k}</div><div class="token-value">${v}</div></div>
-            </div>`).join('')}
-        </div>
-        <div class="section-label">Animations</div>
-        <div class="token-grid">
-          ${Object.entries(motion.animations).map(([k, v]) => `
-            <div class="token-row">
-              <div class="token-info"><div class="token-name">${k}</div><div class="token-value">${v}</div></div>
-            </div>`).join('')}
-        </div>
-      </div>
-
-      <!-- COMPONENTS PANEL -->
-      <div id="panel-components" class="panel">
-        <div class="panel-title">Components</div>
-        <div class="panel-desc">Live preview of components using current tokens. Edit colors or type and watch these update.</div>
-
+    <!-- Canvas -->
+    <div class="canvas">
+      <!-- CANVAS: Component Gallery (default view) -->
+      <div id="panel-canvas" class="panel active">
+        <div class="panel-title">Canvas</div>
+        <div class="panel-sub">Live components rendered with current tokens. Change a color and watch everything update.</div>
         <div class="comp-grid">
-          <!-- Buttons -->
           <div class="comp-card">
             <div class="comp-card-title">Buttons</div>
             <div class="comp-row">
-              <button class="preview-btn primary">Primary</button>
-              <button class="preview-btn secondary">Secondary</button>
-              <button class="preview-btn ghost">Ghost</button>
+              <button class="p-btn primary">Primary</button>
+              <button class="p-btn secondary">Secondary</button>
+              <button class="p-btn ghost">Ghost</button>
             </div>
             <div class="comp-row">
-              <button class="preview-btn primary sm">Small</button>
-              <button class="preview-btn danger sm">Danger</button>
-              <button class="preview-btn secondary sm" disabled>Disabled</button>
+              <button class="p-btn primary sm">Small</button>
+              <button class="p-btn danger sm">Danger</button>
+              <button class="p-btn secondary sm" disabled>Disabled</button>
             </div>
           </div>
-
-          <!-- Card -->
           <div class="comp-card">
             <div class="comp-card-title">Card</div>
-            <div class="preview-card">
-              <div class="preview-card-title">Card Title</div>
-              <div class="preview-card-desc">A card component using surface color, border, and text hierarchy tokens.</div>
-            </div>
+            <div class="p-card"><h4>Card Title</h4><p>Surface color, border, text hierarchy tokens in action.</p></div>
           </div>
-
-          <!-- Input -->
           <div class="comp-card">
-            <div class="comp-card-title">Text Input</div>
-            <div class="comp-row">
-              <input class="preview-input" placeholder="Placeholder text\u2026" />
-            </div>
-            <div class="comp-row" style="margin-top:8px">
-              <input class="preview-input" value="Filled input" />
-            </div>
+            <div class="comp-card-title">Input</div>
+            <div class="comp-row"><input class="p-input" placeholder="Placeholder text\u2026" /></div>
+            <div class="comp-row" style="margin-top:8px"><input class="p-input" value="Filled input" /></div>
           </div>
-
-          <!-- Badges -->
           <div class="comp-card">
             <div class="comp-card-title">Badges</div>
             <div class="comp-row">
-              <span class="preview-badge accent">Accent</span>
-              <span class="preview-badge success">Success</span>
-              <span class="preview-badge warning">Warning</span>
-              <span class="preview-badge danger">Danger</span>
-              <span class="preview-badge neutral">Neutral</span>
+              <span class="p-badge accent">Accent</span>
+              <span class="p-badge success">Success</span>
+              <span class="p-badge warning">Warning</span>
+              <span class="p-badge danger">Danger</span>
             </div>
           </div>
-
-          <!-- Alerts -->
           <div class="comp-card">
             <div class="comp-card-title">Alerts</div>
             <div class="comp-row" style="flex-direction:column;gap:8px">
-              <div class="preview-alert success">\u2713 Changes saved successfully</div>
-              <div class="preview-alert warning">\u26A0 Review required before push</div>
-              <div class="preview-alert danger">\u2717 Build failed \u2014 check token syntax</div>
+              <div class="p-alert success">\u2713 Changes saved</div>
+              <div class="p-alert warning">\u26A0 Review required</div>
+              <div class="p-alert danger">\u2717 Build failed</div>
             </div>
           </div>
-
-          <!-- Toggle -->
           <div class="comp-card">
             <div class="comp-card-title">Toggle</div>
             <div class="comp-row" style="gap:16px">
               <div style="display:flex;align-items:center;gap:8px">
-                <div class="preview-toggle on" onclick="this.classList.toggle('on')"><div class="preview-toggle-knob"></div></div>
+                <div class="p-toggle on" onclick="this.classList.toggle('on')"><div class="p-toggle-knob"></div></div>
                 <span style="font-size:13px">Enabled</span>
               </div>
               <div style="display:flex;align-items:center;gap:8px">
-                <div class="preview-toggle" onclick="this.classList.toggle('on')"><div class="preview-toggle-knob"></div></div>
-                <span style="font-size:13px">Disabled</span>
+                <div class="p-toggle" onclick="this.classList.toggle('on')"><div class="p-toggle-knob"></div></div>
+                <span style="font-size:13px">Off</span>
               </div>
             </div>
           </div>
+        </div>
+        <div class="label">Custom Components</div>
+        <div class="comp-grid" id="custom-components"></div>
+      </div>
 
-          <!-- Table -->
-          <div class="comp-card" style="grid-column:1/-1">
-            <div class="comp-card-title">Table</div>
-            <table class="preview-table">
-              <thead><tr><th>Name</th><th>Framework</th><th>Port</th><th>Status</th></tr></thead>
-              <tbody>
-                ${Object.entries(apps).slice(0, 4).map(([, cfg]) => `
-                <tr>
-                  <td style="font-weight:500">${cfg.label}</td>
-                  <td><code style="font-size:12px">${cfg.framework}</code></td>
-                  <td>${cfg.port || '\u2014'}</td>
-                  <td><span class="preview-badge success">synced</span></td>
-                </tr>`).join('')}
-              </tbody>
-            </table>
+      <!-- COLORS -->
+      <div id="panel-colors" class="panel">
+        <div class="panel-title">Colors</div>
+        <div class="panel-sub">Click any swatch to edit. Changes update the canvas in real-time.</div>
+        <div class="label">Brand</div>
+        <div class="token-grid" id="brand-colors"></div>
+        <div class="label">Semantic</div>
+        <div class="token-grid" id="semantic-colors"></div>
+        <div class="label">Accent Scale</div>
+        <div class="scale-strip" id="accent-scale"></div>
+        <div class="label">Gray Scale</div>
+        <div class="scale-strip" id="gray-scale"></div>
+      </div>
+
+      <!-- TYPOGRAPHY -->
+      <div id="panel-type" class="panel">
+        <div class="panel-title">Typography</div>
+        <div class="panel-sub">Font families and type scale.</div>
+        <div class="label">Families</div>
+        <div style="display:grid;gap:8px">
+          <div style="padding:16px;border:1px solid var(--color-border);border-radius:10px">
+            <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin-bottom:6px">Display</div>
+            <div style="font-family:var(--font-serif);font-size:clamp(1.4rem,1.3rem+0.6vw,1.8rem);font-weight:400;letter-spacing:-0.02em">Cormorant Garamond</div>
+          </div>
+          <div style="padding:16px;border:1px solid var(--color-border);border-radius:10px">
+            <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin-bottom:6px">Body</div>
+            <div style="font-family:var(--font-body);font-size:14px">DM Sans \u2014 The quick brown fox jumps over the lazy dog</div>
+          </div>
+          <div style="padding:16px;border:1px solid var(--color-border);border-radius:10px">
+            <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin-bottom:6px">Mono</div>
+            <div style="font-family:var(--font-mono);font-size:12px">DM Mono \u2014 The quick brown fox jumps over the lazy dog</div>
+          </div>
+        </div>
+        <div class="label">Scale</div>
+        <div id="type-scale"></div>
+      </div>
+
+      <!-- MOTION -->
+      <div id="panel-motion" class="panel">
+        <div class="panel-title">Motion</div>
+        <div class="panel-sub">Easing, keyframes, and transitions.</div>
+        <div class="label">Easing</div>
+        <div class="token-grid">
+          ${Object.entries(motion.easing).map(([k, v]) => `<div class="token-row"><div class="token-info"><div class="token-name">${k.replace('--','')}</div><div class="token-value">${v}</div></div></div>`).join('')}
+        </div>
+        <div class="label">Transitions</div>
+        <div class="token-grid">
+          ${Object.entries(motion.transitions).map(([k, v]) => `<div class="token-row"><div class="token-info"><div class="token-name">${k}</div><div class="token-value">${v}</div></div></div>`).join('')}
+        </div>
+      </div>
+
+      <!-- CREATE -->
+      <div id="panel-create" class="panel">
+        <div class="panel-title">Create</div>
+        <div class="panel-sub">Define new components. Write HTML that uses CSS variables \u2014 it renders live on the canvas.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="create-form">
+            <div class="create-field">
+              <label>Component Name</label>
+              <input id="create-name" placeholder="e.g. Stat Card, Nav Item, Avatar" />
+            </div>
+            <div class="create-field">
+              <label>HTML (uses CSS vars)</label>
+              <textarea id="create-html" placeholder='<div style="padding:16px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:10px">\\n  <h3 style="font-size:14px;font-weight:600">Title</h3>\\n  <p style="font-size:13px;color:var(--color-text-secondary)">Description</p>\\n</div>'></textarea>
+            </div>
+            <div class="create-field">
+              <label>CSS (optional)</label>
+              <textarea id="create-css" placeholder="Additional styles\u2026" style="min-height:60px"></textarea>
+            </div>
+            <button class="btn primary" onclick="createComponent()">Create Component</button>
+          </div>
+          <div>
+            <div class="label" style="margin-top:0">Live Preview</div>
+            <div class="create-preview" id="create-preview"></div>
           </div>
         </div>
       </div>
 
-      <!-- APPS PANEL -->
+      <!-- APPS -->
       <div id="panel-apps" class="panel">
         <div class="panel-title">Connected Apps</div>
-        <div class="panel-desc">Push token changes to all apps, or push individually. Pull latest from git.</div>
-
-        <div style="display:flex;gap:8px;margin-bottom:24px">
-          <button class="topbar-btn primary" onclick="pushAll()">Push All Apps</button>
-          <button class="topbar-btn" onclick="gitPull()">Git Pull</button>
-          <button class="topbar-btn" onclick="gitStatus()">Git Status</button>
+        <div class="panel-sub">Push tokens to all apps. Pull latest from every repo.</div>
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <button class="btn primary" onclick="agentCmd('push')">Push All</button>
+          <button class="btn" onclick="agentCmd('pull all')">Pull All Repos</button>
+          <button class="btn" onclick="agentCmd('status')">Git Status</button>
         </div>
-
         <div id="apps-list">
           ${Object.entries(apps).map(([key, cfg]) => `
             <div class="app-row" id="app-${key}">
@@ -922,26 +778,21 @@ ${cssVars}
                 <span class="app-name">${cfg.label}</span>
                 <span class="app-meta">${cfg.framework} ${cfg.port ? ':' + cfg.port : ''}</span>
               </div>
-              <div class="app-actions">
+              <div style="display:flex;align-items:center;gap:6px">
                 <span class="app-status" id="status-${key}">\u2014</span>
-                <button class="topbar-btn" onclick="pushApp('${key}')" style="font-size:9px;padding:4px 10px">Push</button>
               </div>
             </div>`).join('')}
         </div>
-
-        <div class="section-label">Git</div>
-        <pre id="git-output" style="font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary);background:var(--color-surface);padding:16px;border-radius:8px;overflow-x:auto;white-space:pre-wrap;min-height:60px">\u2014</pre>
+        <div class="label">Output</div>
+        <pre id="git-output" style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-secondary);background:var(--color-surface);padding:14px;border-radius:8px;overflow-x:auto;white-space:pre-wrap;min-height:60px">\u2014</pre>
       </div>
+    </div>
 
-      <!-- ASSETS PANEL -->
-      <div id="panel-assets" class="panel">
-        <div class="panel-title">Dist Assets</div>
-        <div class="panel-desc">Download compiled CSS files for manual integration.</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <a href="./gravity.css" class="topbar-btn" style="text-decoration:none;display:inline-block">gravity.css</a>
-          <a href="./gravity-tw4.css" class="topbar-btn" style="text-decoration:none;display:inline-block">gravity-tw4.css</a>
-          <a href="./gravity-tw4-inline.css" class="topbar-btn" style="text-decoration:none;display:inline-block">gravity-tw4-inline.css</a>
-        </div>
+    <!-- Activity Feed -->
+    <div class="activity">
+      <div class="activity-header">Activity</div>
+      <div class="activity-feed" id="activity-feed">
+        <div class="activity-item"><div class="time">now</div><div class="msg">Leonardo ready. Type a command or click the canvas.</div></div>
       </div>
     </div>
   </div>
@@ -950,214 +801,200 @@ ${cssVars}
 <div class="toast" id="toast"></div>
 
 <script>
-// ── State ──────────────────────────────────────────────
-const STATE = {
-  tokens: ${embeddedTokens},
-  apps: ${embeddedApps},
-  dirty: false
-};
+const STATE = { tokens: ${embeddedTokens}, apps: ${embeddedApps}, dirty: false };
 
 // ── Navigation ─────────────────────────────────────────
-document.querySelectorAll('.sidebar-item[data-panel]').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+document.querySelectorAll('.nav-btn[data-panel]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    item.classList.add('active');
-    document.getElementById('panel-' + item.dataset.panel).classList.add('active');
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
   });
 });
 
-// ── Toast ──────────────────────────────────────────────
-function toast(msg, duration = 2500) {
+// ── Toast + Activity ───────────────────────────────────
+function toast(msg, dur = 2500) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), duration);
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
 }
+
+function log(msg, type = '') {
+  const feed = document.getElementById('activity-feed');
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const item = document.createElement('div');
+  item.className = 'activity-item ' + type;
+  item.innerHTML = '<div class="time">' + now + '</div><div class="msg">' + msg + '</div>';
+  feed.insertBefore(item, feed.firstChild);
+}
+
+// ── Agent Command System ───────────────────────────────
+async function agentCmd(command) {
+  log('Running: <strong>' + command + '</strong>');
+  toast('Executing: ' + command);
+  try {
+    const res = await fetch('/api/agent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      log('<strong>' + (data.message || data.action) + '</strong>', 'success');
+      toast(data.message || 'Done');
+      // Apply color changes live
+      if (data.action === 'color-change') {
+        document.documentElement.style.setProperty('--color-' + data.token, data.value);
+        // Refresh token state from server
+        refreshTokens();
+      }
+      if (data.action === 'font-change') refreshTokens();
+      if (data.action === 'pull-all' && data.results) {
+        const out = Object.entries(data.results).map(([k,v]) => k + ': ' + v).join('\\n');
+        document.getElementById('git-output').textContent = out;
+      }
+      if (data.output) document.getElementById('git-output').textContent = data.output;
+    } else {
+      log(data.message || data.error || 'Command failed', 'error');
+      toast(data.message || 'Unknown command');
+    }
+  } catch (e) {
+    log('Error: ' + e.message, 'error');
+    toast('Error: ' + e.message);
+  }
+}
+
+async function refreshTokens() {
+  try {
+    const res = await fetch('/api/tokens');
+    const tokens = await res.json();
+    STATE.tokens = tokens;
+    renderColorGrid('brand-colors', tokens.color.brand, 'brand');
+    renderColorGrid('semantic-colors', tokens.color.semantic, 'semantic');
+    renderScale('accent-scale', tokens.color.scales.indigo);
+    renderScale('gray-scale', tokens.color.scales.gray);
+    renderTypeScale();
+  } catch (e) { /* server might not be running */ }
+}
+
+// Command bar
+document.getElementById('cmdInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && this.value.trim()) {
+    agentCmd(this.value.trim());
+    this.value = '';
+  }
+});
 
 // ── Color Editors ──────────────────────────────────────
-function renderColorGrid(containerId, obj, tokenPath) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
+function renderColorGrid(id, obj, path) {
+  const c = document.getElementById(id); if (!c) return; c.innerHTML = '';
   for (const [key, value] of Object.entries(obj)) {
     if (!key.startsWith('--')) continue;
-    const name = key.replace(/^--color-/, '');
-    const row = document.createElement('div');
-    row.className = 'token-row';
-    row.innerHTML =
-      '<div class="token-swatch" style="background:' + value + '">' +
-        '<input type="color" value="' + toHex(value) + '" data-token="' + key + '" data-path="' + tokenPath + '">' +
-      '</div>' +
-      '<div class="token-info">' +
-        '<div class="token-name">' + name + '</div>' +
-        '<div class="token-value">' + value + '</div>' +
-      '</div>';
-    row.querySelector('input').addEventListener('input', onColorChange);
-    container.appendChild(row);
+    const row = document.createElement('div'); row.className = 'token-row';
+    row.innerHTML = '<div class="token-swatch" style="background:' + value + '"><input type="color" value="' + toHex(value) + '" data-token="' + key + '" data-path="' + path + '"></div><div class="token-info"><div class="token-name">' + key.replace(/^--color-/,'') + '</div><div class="token-value">' + value + '</div></div>';
+    row.querySelector('input').addEventListener('input', onColor);
+    c.appendChild(row);
   }
 }
-
-function renderScale(containerId, obj) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
+function renderScale(id, obj) {
+  const c = document.getElementById(id); if (!c) return; c.innerHTML = '';
   for (const [key, value] of Object.entries(obj)) {
-    const step = key.replace(/--color-\\w+-/, '');
-    const chip = document.createElement('div');
-    chip.className = 'scale-chip';
-    chip.innerHTML =
-      '<div class="scale-chip-swatch" style="background:' + value + '">' +
-        '<input type="color" value="' + toHex(value) + '" data-token="' + key + '">' +
-      '</div>' +
-      '<div class="scale-chip-label">' + step + '</div>';
-    chip.querySelector('input').addEventListener('input', onScaleChange);
-    container.appendChild(chip);
+    const chip = document.createElement('div'); chip.className = 'scale-chip';
+    chip.innerHTML = '<div class="scale-chip-swatch" style="background:' + value + '"><input type="color" value="' + toHex(value) + '" data-token="' + key + '"></div><div class="scale-chip-label">' + key.replace(/--color-\\w+-/,'') + '</div>';
+    chip.querySelector('input').addEventListener('input', function(e) {
+      document.documentElement.style.setProperty(e.target.dataset.token, e.target.value);
+      e.target.parentElement.style.background = e.target.value;
+      STATE.dirty = true;
+    });
+    c.appendChild(chip);
   }
 }
-
-function onColorChange(e) {
-  const token = e.target.dataset.token;
-  const val = e.target.value;
-  document.documentElement.style.setProperty(token, val);
-  e.target.parentElement.style.background = val;
-  e.target.closest('.token-row').querySelector('.token-value').textContent = val;
-
-  // Update state
-  const path = e.target.dataset.path;
-  if (path) updateNestedToken(STATE.tokens.color, path, token, val);
+function onColor(e) {
+  const t = e.target.dataset.token, v = e.target.value;
+  document.documentElement.style.setProperty(t, v);
+  e.target.parentElement.style.background = v;
+  e.target.closest('.token-row').querySelector('.token-value').textContent = v;
+  const p = e.target.dataset.path;
+  if (p) { let ref = STATE.tokens.color; for (const k of p.split('.')) ref = ref[k]; if (ref) ref[t] = v; }
   STATE.dirty = true;
 }
-
-function onScaleChange(e) {
-  const token = e.target.dataset.token;
-  const val = e.target.value;
-  document.documentElement.style.setProperty(token, val);
-  e.target.parentElement.style.background = val;
-
-  // Update state in scales
-  for (const scale of Object.values(STATE.tokens.color.scales)) {
-    if (scale[token] !== undefined) { scale[token] = val; break; }
-  }
-  STATE.dirty = true;
-}
-
-function updateNestedToken(obj, path, token, val) {
-  const parts = path.split('.');
-  let ref = obj;
-  for (const p of parts) ref = ref[p];
-  if (ref) ref[token] = val;
-}
-
-function toHex(color) {
-  if (color.startsWith('#') && (color.length === 7 || color.length === 4)) return color.length === 4
-    ? '#' + color[1]+color[1]+color[2]+color[2]+color[3]+color[3]
-    : color;
-  if (color.startsWith('rgba') || color.startsWith('rgb')) {
-    const m = color.match(/[\\d.]+/g);
-    if (m && m.length >= 3) {
-      const r = parseInt(m[0]).toString(16).padStart(2,'0');
-      const g = parseInt(m[1]).toString(16).padStart(2,'0');
-      const b = parseInt(m[2]).toString(16).padStart(2,'0');
-      return '#' + r + g + b;
-    }
-  }
+function toHex(c) {
+  if (c.startsWith('#') && c.length >= 4) return c.length === 4 ? '#'+c[1]+c[1]+c[2]+c[2]+c[3]+c[3] : c;
+  if (c.startsWith('rgb')) { const m = c.match(/[\\d.]+/g); if (m&&m.length>=3) return '#'+[0,1,2].map(i=>parseInt(m[i]).toString(16).padStart(2,'0')).join(''); }
   return '#888888';
 }
 
 // ── Type Scale ─────────────────────────────────────────
 function renderTypeScale() {
-  const container = document.getElementById('type-scale');
-  container.innerHTML = '';
+  const c = document.getElementById('type-scale'); if (!c) return; c.innerHTML = '';
   for (const [key, value] of Object.entries(STATE.tokens.typography.scale)) {
-    const name = key.replace('--text-', '');
     const row = document.createElement('div');
-    row.className = 'type-preview';
-    row.innerHTML =
-      '<div class="type-label">' + name + '</div>' +
-      '<div class="type-sample" style="font-size:' + value + '">The quick brown fox jumps over the lazy dog</div>';
-    container.appendChild(row);
+    row.style.cssText = 'display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--color-border)';
+    row.innerHTML = '<div style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-faint);width:36px">' + key.replace('--text-','') + '</div><div style="font-size:' + value + ';line-height:1.3">The quick brown fox jumps over the lazy dog</div>';
+    c.appendChild(row);
   }
 }
 
-// ── Init Renders ───────────────────────────────────────
+// ── Save Tokens ────────────────────────────────────────
+async function saveTokens() {
+  if (!STATE.dirty) { toast('No changes'); return; }
+  try {
+    await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: 'color.json', data: STATE.tokens.color }) });
+    STATE.dirty = false; toast('Saved'); log('Tokens saved to disk', 'success');
+  } catch (e) { toast('Save failed'); log('Save error: ' + e.message, 'error'); }
+}
+
+// ── Create Component ───────────────────────────────────
+document.getElementById('create-html').addEventListener('input', function() {
+  document.getElementById('create-preview').innerHTML = this.value;
+});
+
+async function createComponent() {
+  const name = document.getElementById('create-name').value.trim();
+  const html = document.getElementById('create-html').value.trim();
+  const css = document.getElementById('create-css').value.trim();
+  if (!name || !html) { toast('Need name and HTML'); return; }
+  try {
+    const res = await fetch('/api/components', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, html, css })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      toast('Component created: ' + name);
+      log('Created component: <strong>' + name + '</strong>', 'success');
+      document.getElementById('create-name').value = '';
+      document.getElementById('create-html').value = '';
+      document.getElementById('create-css').value = '';
+      document.getElementById('create-preview').innerHTML = '';
+      loadCustomComponents();
+    } else { toast('Error: ' + (data.error || 'unknown')); }
+  } catch (e) { toast('Error: ' + e.message); }
+}
+
+async function loadCustomComponents() {
+  const container = document.getElementById('custom-components');
+  try {
+    const res = await fetch('/api/components');
+    const components = await res.json();
+    container.innerHTML = '';
+    if (!components.length) { container.innerHTML = '<div style="font-size:13px;color:var(--color-text-faint)">No custom components yet. Use the Create panel or type "create component" in the command bar.</div>'; return; }
+    for (const comp of components) {
+      const card = document.createElement('div'); card.className = 'comp-card';
+      card.innerHTML = '<div class="comp-card-title">' + comp.name + '</div>' + comp.html;
+      container.appendChild(card);
+    }
+  } catch (e) { container.innerHTML = '<div style="font-size:12px;color:var(--color-text-faint)">Run <code>node server.js</code> locally for full features.</div>'; }
+}
+
+// ── Init ───────────────────────────────────────────────
 renderColorGrid('brand-colors', STATE.tokens.color.brand, 'brand');
 renderColorGrid('semantic-colors', STATE.tokens.color.semantic, 'semantic');
 renderScale('accent-scale', STATE.tokens.color.scales.indigo);
 renderScale('gray-scale', STATE.tokens.color.scales.gray);
 renderTypeScale();
-
-// ── API Calls ──────────────────────────────────────────
-async function saveTokens() {
-  if (!STATE.dirty) { toast('No changes to save'); return; }
-  try {
-    await fetch('/api/tokens', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file: 'color.json', data: STATE.tokens.color })
-    });
-    STATE.dirty = false;
-    toast('Tokens saved');
-  } catch (e) { toast('Save failed: ' + e.message); }
-}
-
-async function pushAll() {
-  toast('Pushing to all apps\u2026');
-  try {
-    const res = await fetch('/api/push', { method: 'POST' });
-    const data = await res.json();
-    if (data.ok) {
-      toast('Push complete');
-      document.getElementById('git-output').textContent = data.output || 'Done';
-    } else {
-      toast('Push failed');
-      document.getElementById('git-output').textContent = data.error || 'Unknown error';
-    }
-  } catch (e) { toast('Push failed: ' + e.message); }
-}
-
-async function pushApp(key) {
-  const statusEl = document.getElementById('status-' + key);
-  statusEl.textContent = 'pushing\u2026';
-  try {
-    const res = await fetch('/api/push', { method: 'POST' });
-    const data = await res.json();
-    statusEl.textContent = data.ok ? 'pushed' : 'failed';
-    setTimeout(() => statusEl.textContent = '\u2014', 3000);
-  } catch (e) { statusEl.textContent = 'error'; }
-}
-
-async function gitPull() {
-  toast('Pulling latest\u2026');
-  try {
-    const res = await fetch('/api/git', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'pull' })
-    });
-    const data = await res.json();
-    document.getElementById('git-output').textContent = data.output || data.error || JSON.stringify(data);
-    toast(data.ok ? 'Pull complete' : 'Pull failed');
-  } catch (e) { toast('Pull failed: ' + e.message); }
-}
-
-async function gitStatus() {
-  try {
-    const res = await fetch('/api/git');
-    const data = await res.json();
-    document.getElementById('git-output').textContent =
-      'Branch: ' + data.branch + '\\n\\nStatus:\\n' + data.status + '\\n\\nRecent commits:\\n' + data.log;
-  } catch (e) {
-    document.getElementById('git-output').textContent = 'Error: ' + e.message;
-  }
-}
-
-// ── Agent Bar ──────────────────────────────────────────
-document.getElementById('agentInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && this.value.trim()) {
-    const cmd = this.value.trim();
-    toast('Agent command: "' + cmd + '" \u2014 processing on server requires Claude integration');
-    this.value = '';
-  }
-});
+loadCustomComponents();
 </script>
 </body>
 </html>`;
