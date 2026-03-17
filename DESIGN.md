@@ -1,4 +1,4 @@
-# Design System — Gravity
+# Design System — Leonardo
 
 <!-- HAND-EDITED: Edit this preamble section freely. build.js preserves it. -->
 
@@ -44,7 +44,7 @@ DM Mono: 400,500
 ### Typography Utilities
 
 - `.text-eyebrow` — DM Mono, 0.56rem, uppercase, 0.08em tracking, 500 weight
-- `.gravity-label` — DM Mono, 0.6rem, uppercase, 0.06em tracking, 500 weight
+- `.leonardo-label` — DM Mono, 0.6rem, uppercase, 0.06em tracking, 500 weight
 - `.font-serif` — Apply Cormorant Garamond
 - `.tracking-tight-editorial` — -0.02em (for headlines)
 - `.tracking-wide-editorial` — 0.08em (for caps/labels)
@@ -177,13 +177,13 @@ All three Tailwind gray families map to the same warm neutral scale:
 
 ---
 
-## Apps Using Gravity
+## Apps Using Leonardo
 
 | App | Framework | Port | Extensions |
 |-----|-----------|------|------------|
 | Spacekayak.ops (Fermi Ops) | Vite + TW4 | 3000 | — |
 | Feedback Hub | Vite + TW4 | 5180 | — |
-| Meeting Notetaker (Gravity Notes) | Next.js + TW4 | 3005 | — |
+| Meeting Notetaker (Leonardo Notes) | Next.js + TW4 | 3005 | — |
 | Brane | Vite + TW4 | — | brane (terminal) |
 
 ---

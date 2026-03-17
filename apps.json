@@ -33,7 +33,7 @@
     "theme": "@theme inline",
     "extensions": [],
     "port": 3005,
-    "label": "Gravity Notes"
+    "label": "Leonardo Notes"
   },
   "mirofish": {
     "path": "../mirofish/frontend",

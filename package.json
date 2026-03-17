@@ -2,7 +2,7 @@
   "name": "leonardo",
   "version": "1.0.0",
   "description": "Leonardo — Universal design system adopter layer. Taste-driven, agentic-first.",
-  "main": "dist/gravity.css",
+  "main": "dist/leonardo.css",
   "scripts": {
     "build": "node build.js",
     "push": "node build.js --push",

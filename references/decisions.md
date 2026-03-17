@@ -14,7 +14,7 @@ ADR-style records of design system decisions.
 ## DEC-002: App injection via CSS markers
 
 **Date:** 2026-03-17
-**Decision:** Use `/* GRAVITY-START */` / `/* GRAVITY-END */` markers in app CSS
+**Decision:** Use `/* LEONARDO-START */` / `/* LEONARDO-END */` markers in app CSS
 **Rationale:** Apps keep app-specific CSS outside the markers. leonardo owns only the fenced section. This preserves flexibility while ensuring single source of truth.
 **Alternatives considered:** Full file replacement (too aggressive), npm package import (too much ceremony for sibling dirs)
 

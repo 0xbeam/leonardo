@@ -9,9 +9,9 @@
 | Feature | Description |
 |---------|-------------|
 | **Single source of truth** | All tokens live in `tokens/*.json`, compiled to CSS custom properties |
-| **Multi-app push** | `--push` injects tokens between `GRAVITY-START` / `GRAVITY-END` markers in every connected app |
+| **Multi-app push** | `--push` injects tokens between `LEONARDO-START` / `LEONARDO-END` markers in every connected app |
 | **Dry-run diffs** | `--diff` previews exactly what would change before writing |
-| **Tailwind v4 output** | Generates both `gravity.css` and `gravity-tw4.css` |
+| **Tailwind v4 output** | Generates both `leonardo.css` and `leonardo-tw4.css` |
 | **App-specific extensions** | Override tokens per-app via `extensions/` |
 | **Zero dependencies** | Just Node.js — no build tools, no bundler |
 
@@ -39,7 +39,7 @@ node build.js --diff    # dry run — see what would change
 | Fermi Ops | Vite + TW4 | `src/index.css` |
 | Feedback Hub | Vite + TW4 | `src/index.css` |
 | Brane | Vite + TW4 | `src/index.css` |
-| Gravity Notes | Next.js + TW4 | `src/app/globals.css` |
+| Leonardo Notes | Next.js + TW4 | `src/app/globals.css` |
 | MiroFish | Vite + TW4 | `src/index.css` |
 
 Configure targets in `apps.json`.
@@ -49,7 +49,7 @@ Configure targets in `apps.json`.
 ```
 tokens/           JSON token definitions
 extensions/       app-specific overrides
-dist/             compiled CSS (gravity.css, gravity-tw4.css)
+dist/             compiled CSS (leonardo.css, leonardo-tw4.css)
 apps.json         connected app registry
 build.js          compiler + injector
 ```
