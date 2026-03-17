@@ -1,5 +1,11 @@
 {
   "buildCommand": "node build.js",
   "outputDirectory": "dist",
-  "framework": null
+  "framework": null,
+  "functions": {
+    "api/*.js": {
+      "memory": 256,
+      "maxDuration": 30
+    }
+  }
 }

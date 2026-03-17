@@ -321,215 +321,844 @@ function pushToApp(appName, appConfig) {
 function buildIndex() {
   const color = loadJSON(path.join(TOKENS_DIR, 'color.json'));
   const typography = loadJSON(path.join(TOKENS_DIR, 'typography.json'));
+  const motion = loadJSON(path.join(TOKENS_DIR, 'motion.json'));
+  const spacing = loadJSON(path.join(TOKENS_DIR, 'spacing.json'));
   const apps = loadJSON(path.join(ROOT, 'apps.json'));
 
-  const brandColors = Object.entries(color.brand).map(([k, v]) =>
-    `<div style="display:flex;align-items:center;gap:12px;padding:6px 0">
-      <div style="width:32px;height:32px;border-radius:6px;background:${v};border:1px solid rgba(0,0,0,0.06)"></div>
-      <code style="font-size:12px;color:#525250">${k.replace('--color-','')}</code>
-      <span style="font-size:11px;color:#A3A39D;font-family:'DM Mono',monospace">${v}</span>
-    </div>`
-  ).join('');
+  // Embed all tokens as JSON for client-side state
+  const embeddedTokens = JSON.stringify({ color, typography, motion, spacing });
+  const embeddedApps = JSON.stringify(apps);
 
-  const accentScale = Object.entries(color.scales.indigo).map(([k, v]) => {
-    const step = k.replace('--color-indigo-', '');
-    return `<div style="flex:1;text-align:center">
-      <div style="height:40px;background:${v};border-radius:4px;margin-bottom:4px"></div>
-      <span style="font-size:10px;color:#A3A39D;font-family:'DM Mono',monospace">${step}</span>
-    </div>`;
-  }).join('');
-
-  const grayScale = Object.entries(color.scales.gray).map(([k, v]) => {
-    const step = k.replace('--color-gray-', '');
-    return `<div style="flex:1;text-align:center">
-      <div style="height:40px;background:${v};border-radius:4px;margin-bottom:4px"></div>
-      <span style="font-size:10px;color:#A3A39D;font-family:'DM Mono',monospace">${step}</span>
-    </div>`;
-  }).join('');
-
-  const typeScale = Object.entries(typography.scale).map(([k, v]) => {
-    const name = k.replace('--text-', '');
-    return `<div style="display:flex;align-items:baseline;gap:16px;padding:8px 0;border-bottom:1px solid #E8E5E0">
-      <code style="font-size:11px;color:#A3A39D;font-family:'DM Mono',monospace;width:48px">${name}</code>
-      <span style="font-size:${v};color:#111114;line-height:1.3">The quick brown fox jumps</span>
-    </div>`;
-  }).join('');
-
-  const appList = Object.entries(apps).map(([name, cfg]) =>
-    `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #E8E5E0">
-      <div>
-        <span style="font-weight:500;color:#111114">${cfg.label}</span>
-        <span style="font-size:11px;color:#A3A39D;margin-left:8px;font-family:'DM Mono',monospace">${cfg.framework}</span>
-      </div>
-      <span style="font-size:11px;color:#A3A39D;font-family:'DM Mono',monospace">${cfg.port ? ':' + cfg.port : '—'}</span>
-    </div>`
-  ).join('');
+  // Build CSS variables from tokens for live preview
+  const allTokens = {};
+  Object.assign(allTokens, flattenTokens(color.brand));
+  Object.assign(allTokens, flattenTokens(color.semantic));
+  Object.assign(allTokens, flattenTokens(color.scales));
+  Object.assign(allTokens, flattenTokens(typography.fonts));
+  Object.assign(allTokens, flattenTokens(typography.scale));
+  Object.assign(allTokens, flattenTokens(motion.easing));
+  const cssVars = Object.entries(allTokens).map(([k, v]) => `  ${k}: ${v};`).join('\n');
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leonardo — Gravity Design System</title>
+  <title>Leonardo — Design Workbench</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="${typography.fonts.import}" rel="stylesheet">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html { font-size: 14px; }
-    body {
-      font-family: "DM Sans", -apple-system, system-ui, sans-serif;
-      color: #111114;
-      background: #FFFFFF;
-      -webkit-font-smoothing: antialiased;
-      padding: 0;
+    :root {
+${cssVars}
     }
-    code { font-family: "DM Mono", monospace; }
-    a { color: #2A7A5B; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 14px; height: 100%; }
+    body {
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      -webkit-font-smoothing: antialiased;
+      height: 100%;
+      overflow: hidden;
+    }
+    code, .mono { font-family: var(--font-mono); }
 
-    .container { max-width: 720px; margin: 0 auto; padding: 64px 24px 96px; }
-    .eyebrow {
-      font-family: "DM Mono", monospace;
-      font-size: 0.56rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 500;
-      color: #888;
+    /* ── Layout ─────────────────────────────────────── */
+    .shell { display: flex; flex-direction: column; height: 100vh; }
+    .topbar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 20px; height: 52px; min-height: 52px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg);
+      z-index: 10;
+    }
+    .topbar-brand {
+      font-family: var(--font-serif);
+      font-size: 1.15rem; font-weight: 400;
+      letter-spacing: -0.02em;
+      color: var(--color-text);
+      white-space: nowrap;
+    }
+    .agent-bar {
+      flex: 1; display: flex; align-items: center;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px; padding: 0 12px; height: 34px;
+      margin: 0 8px;
+    }
+    .agent-bar-icon { color: var(--color-text-secondary); font-size: 13px; margin-right: 8px; }
+    .agent-bar input {
+      flex: 1; border: none; background: none; outline: none;
+      font-family: var(--font-body); font-size: 13px;
+      color: var(--color-text);
+    }
+    .agent-bar input::placeholder { color: var(--color-text-faint); }
+    .topbar-actions { display: flex; gap: 6px; }
+    .topbar-btn {
+      font-family: var(--font-mono); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
+      padding: 6px 12px; border-radius: 6px; border: 1px solid var(--color-border);
+      background: var(--color-bg); color: var(--color-text-secondary);
+      cursor: pointer; transition: all 0.15s ease; white-space: nowrap;
+    }
+    .topbar-btn:hover { background: var(--color-surface); color: var(--color-text); }
+    .topbar-btn.primary {
+      background: var(--color-accent); color: #fff; border-color: var(--color-accent);
+    }
+    .topbar-btn.primary:hover { opacity: 0.9; }
+    .topbar-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .body { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ────────────────────────────────────── */
+    .sidebar {
+      width: 180px; min-width: 180px;
+      border-right: 1px solid var(--color-border);
+      padding: 16px 0; overflow-y: auto;
+      background: var(--color-bg);
+    }
+    .sidebar-section {
+      font-family: var(--font-mono); font-size: 9px;
+      text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;
+      color: var(--color-text-faint); padding: 12px 20px 6px;
+    }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 20px; font-size: 13px; color: var(--color-text-secondary);
+      cursor: pointer; transition: all 0.12s ease;
+      border-left: 2px solid transparent;
+    }
+    .sidebar-item:hover { color: var(--color-text); background: var(--color-surface); }
+    .sidebar-item.active {
+      color: var(--color-accent); background: var(--color-accent-light);
+      border-left-color: var(--color-accent); font-weight: 500;
+    }
+    .sidebar-icon { width: 16px; text-align: center; font-size: 14px; }
+
+    /* ── Main Panel ─────────────────────────────────── */
+    .main { flex: 1; overflow-y: auto; padding: 32px 40px 80px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .panel-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.3rem, 1.3rem + 0.4vw, 1.6rem);
+      font-weight: 400; letter-spacing: -0.02em;
       margin-bottom: 8px;
     }
-    .section { margin-top: 56px; }
-    .section-title {
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(1.3rem, 1.3rem + 0.4vw, 1.6rem);
-      font-weight: 400;
-      letter-spacing: -0.02em;
-      margin-bottom: 24px;
-      color: #111114;
+    .panel-desc {
+      font-size: 13px; color: var(--color-text-secondary);
+      margin-bottom: 32px; max-width: 560px; line-height: 1.6;
     }
-    .scale-row { display: flex; gap: 4px; }
-    .file-link {
-      display: inline-block;
-      font-family: "DM Mono", monospace;
-      font-size: 12px;
-      padding: 4px 10px;
-      background: #F6F5F2;
-      border: 1px solid #E8E5E0;
-      border-radius: 4px;
-      color: #525250;
-      margin: 3px;
+    .section-label {
+      font-family: var(--font-mono); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
+      color: var(--color-text-secondary); margin: 32px 0 12px;
     }
-    .file-link:hover { background: #EFEDE8; text-decoration: none; }
+    .section-label:first-child { margin-top: 0; }
 
-    .hero {
-      padding: 80px 0 48px;
-      border-bottom: 1px solid #E8E5E0;
+    /* ── Token Editors ──────────────────────────────── */
+    .token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+    .token-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      transition: border-color 0.15s ease;
     }
-    .hero h1 {
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(2rem, 1.8rem + 1.2vw, 2.6rem);
-      font-weight: 300;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-      margin-bottom: 12px;
+    .token-row:hover { border-color: var(--color-border-light); }
+    .token-swatch {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.08); cursor: pointer;
+      position: relative; flex-shrink: 0;
     }
-    .hero p {
-      font-size: clamp(0.85rem, 0.85rem + 0.2vw, 1rem);
-      color: #888;
-      max-width: 480px;
-      line-height: 1.6;
+    .token-swatch input[type="color"] {
+      position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%;
+      cursor: pointer; border: none;
     }
-    .badge {
-      display: inline-block;
-      font-family: "DM Mono", monospace;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 3px 8px;
-      background: #E8F5EE;
-      color: #2A7A5B;
-      border-radius: 3px;
-      font-weight: 500;
-      margin-bottom: 16px;
+    .token-info { flex: 1; min-width: 0; }
+    .token-name {
+      font-size: 12px; font-weight: 500; color: var(--color-text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .font-preview {
-      padding: 16px 0;
-      border-bottom: 1px solid #E8E5E0;
+    .token-value {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--color-text-secondary);
     }
-    .font-preview-label {
-      font-family: "DM Mono", monospace;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #A3A39D;
-      margin-bottom: 4px;
+
+    /* ── Scale Row ──────────────────────────────────── */
+    .scale-strip { display: flex; gap: 3px; margin-bottom: 16px; }
+    .scale-chip {
+      flex: 1; text-align: center; cursor: pointer;
+      position: relative;
+    }
+    .scale-chip-swatch {
+      height: 36px; border-radius: 6px; margin-bottom: 3px;
+      border: 1px solid rgba(0,0,0,0.04);
+      position: relative;
+    }
+    .scale-chip-swatch input[type="color"] {
+      position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;
+    }
+    .scale-chip-label {
+      font-family: var(--font-mono); font-size: 9px; color: var(--color-text-faint);
+    }
+
+    /* ── Typography Editor ──────────────────────────── */
+    .type-preview {
+      padding: 12px 0; border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: baseline; gap: 16px;
+    }
+    .type-preview:last-child { border-bottom: none; }
+    .type-label {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--color-text-faint); width: 40px; flex-shrink: 0;
+    }
+    .type-sample { line-height: 1.3; color: var(--color-text); }
+    .font-card {
+      padding: 20px; border: 1px solid var(--color-border);
+      border-radius: 10px; margin-bottom: 10px;
+    }
+    .font-card-label {
+      font-family: var(--font-mono); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--color-text-faint); margin-bottom: 8px;
+    }
+
+    /* ── Component Gallery ──────────────────────────── */
+    .comp-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .comp-card {
+      border: 1px solid var(--color-border); border-radius: 10px;
+      padding: 24px; background: var(--color-bg);
+    }
+    .comp-card-title {
+      font-family: var(--font-mono); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--color-text-faint); margin-bottom: 16px;
+    }
+    .comp-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .comp-row + .comp-row { margin-top: 12px; }
+
+    /* Component preview styles */
+    .preview-btn {
+      font-family: var(--font-body); font-size: 13px; font-weight: 500;
+      padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .preview-btn.primary { background: var(--color-accent); color: #fff; }
+    .preview-btn.primary:hover { opacity: 0.9; }
+    .preview-btn.secondary {
+      background: var(--color-bg); color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+    .preview-btn.secondary:hover { background: var(--color-surface); }
+    .preview-btn.ghost {
+      background: none; color: var(--color-accent); padding: 8px 12px;
+    }
+    .preview-btn.ghost:hover { background: var(--color-accent-light); }
+    .preview-btn.sm { font-size: 12px; padding: 5px 12px; border-radius: 6px; }
+    .preview-btn.danger { background: var(--color-danger); color: #fff; }
+
+    .preview-card {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: 10px; padding: 20px; width: 100%;
+    }
+    .preview-card-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .preview-card-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
+
+    .preview-input {
+      font-family: var(--font-body); font-size: 13px;
+      padding: 8px 12px; border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg); color: var(--color-text);
+      width: 100%; outline: none; transition: border-color 0.15s ease;
+    }
+    .preview-input:focus { border-color: var(--color-accent); }
+    .preview-input::placeholder { color: var(--color-text-faint); }
+
+    .preview-badge {
+      display: inline-block; font-family: var(--font-mono);
+      font-size: 10px; font-weight: 500; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 3px 8px; border-radius: 4px;
+    }
+    .preview-badge.accent { background: var(--color-accent-light); color: var(--color-accent); }
+    .preview-badge.success { background: #E8F5EE; color: var(--color-success); }
+    .preview-badge.warning { background: #FEF3CD; color: var(--color-warning); }
+    .preview-badge.danger { background: #FDE8E8; color: var(--color-danger); }
+    .preview-badge.neutral { background: var(--color-surface); color: var(--color-text-secondary); }
+
+    .preview-alert {
+      padding: 12px 16px; border-radius: 8px; font-size: 13px;
+      display: flex; align-items: center; gap: 8px; width: 100%;
+    }
+    .preview-alert.success { background: #E8F5EE; color: var(--color-success); border: 1px solid #A3D7C1; }
+    .preview-alert.warning { background: #FEF3CD; color: var(--color-warning); border: 1px solid #F5D77B; }
+    .preview-alert.danger { background: #FDE8E8; color: var(--color-danger); border: 1px solid #F0A0A0; }
+
+    .preview-toggle {
+      width: 40px; height: 22px; border-radius: 11px;
+      background: var(--color-border); cursor: pointer;
+      position: relative; transition: background 0.2s ease;
+    }
+    .preview-toggle.on { background: var(--color-accent); }
+    .preview-toggle-knob {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; position: absolute; top: 2px; left: 2px;
+      transition: transform 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .preview-toggle.on .preview-toggle-knob { transform: translateX(18px); }
+
+    .preview-table { width: 100%; border-collapse: collapse; }
+    .preview-table th {
+      font-family: var(--font-mono); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--color-text-faint); text-align: left;
+      padding: 8px 12px; border-bottom: 1px solid var(--color-border);
+    }
+    .preview-table td {
+      font-size: 13px; padding: 10px 12px;
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+    .preview-table tr { transition: background 0.15s ease; }
+    .preview-table tbody tr:hover { background: rgba(42,122,91,0.03); }
+
+    /* ── Apps Panel ─────────────────────────────────── */
+    .app-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border: 1px solid var(--color-border);
+      border-radius: 10px; margin-bottom: 8px;
+      transition: border-color 0.15s ease;
+    }
+    .app-row:hover { border-color: var(--color-border-light); }
+    .app-name { font-weight: 500; font-size: 14px; }
+    .app-meta {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--color-text-secondary); margin-left: 8px;
+    }
+    .app-actions { display: flex; gap: 6px; align-items: center; }
+    .app-status {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--color-text-faint); margin-right: 8px;
+    }
+
+    /* ── Toast ──────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--color-text); color: var(--color-bg);
+      font-size: 13px; padding: 10px 20px; border-radius: 8px;
+      opacity: 0; transform: translateY(8px);
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none; z-index: 100;
+      font-family: var(--font-body);
+    }
+    .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+    /* ── Responsive ─────────────────────────────────── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { padding: 24px 16px 80px; }
+      .comp-grid { grid-template-columns: 1fr; }
+      .token-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="hero">
-      <div class="badge">Design System</div>
-      <h1>Leonardo</h1>
-      <p>Universal design system adopter layer for Gravity. Taste-driven, agentic-first. One source of truth for tokens, typography, color, and motion — pushed to every app.</p>
+<div class="shell">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-brand">Leonardo</div>
+    <div class="agent-bar">
+      <span class="agent-bar-icon">\u2318</span>
+      <input type="text" id="agentInput" placeholder="Describe a change\u2026 \u201cmake accent warmer\u201d, \u201cadd a tooltip component\u201d" />
     </div>
-
-    <div class="section">
-      <div class="eyebrow">Assets</div>
-      <p class="section-title">Dist Files</p>
-      <div>
-        <a href="./gravity.css" class="file-link">gravity.css</a>
-        <a href="./gravity-tw4.css" class="file-link">gravity-tw4.css</a>
-        <a href="./gravity-tw4-inline.css" class="file-link">gravity-tw4-inline.css</a>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="eyebrow">Typography</div>
-      <p class="section-title">Font Families</p>
-      <div class="font-preview">
-        <div class="font-preview-label">Display / Headings</div>
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.6rem,1.5rem + 0.8vw,2rem);font-weight:400;letter-spacing:-0.02em">Cormorant Garamond</div>
-      </div>
-      <div class="font-preview">
-        <div class="font-preview-label">Body / UI</div>
-        <div style="font-family:'DM Sans',-apple-system,sans-serif;font-size:clamp(0.85rem,0.85rem + 0.2vw,1rem)">DM Sans — The quick brown fox jumps over the lazy dog. 0123456789</div>
-      </div>
-      <div class="font-preview" style="border:none">
-        <div class="font-preview-label">Labels / Code</div>
-        <div style="font-family:'DM Mono',monospace;font-size:clamp(0.72rem,0.72rem + 0.1vw,0.82rem)">DM Mono — The quick brown fox jumps over the lazy dog. 0123456789</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="eyebrow">Typography</div>
-      <p class="section-title">Type Scale</p>
-      ${typeScale}
-    </div>
-
-    <div class="section">
-      <div class="eyebrow">Color</div>
-      <p class="section-title">Brand Palette</p>
-      ${brandColors}
-    </div>
-
-    <div class="section">
-      <div class="eyebrow">Color</div>
-      <p class="section-title">Accent Scale (Forest Green)</p>
-      <div class="scale-row">${accentScale}</div>
-    </div>
-
-    <div class="section">
-      <div class="eyebrow">Color</div>
-      <p class="section-title">Warm Gray Scale</p>
-      <div class="scale-row">${grayScale}</div>
-    </div>
-
-    <div class="section">
-      <div class="eyebrow">System</div>
-      <p class="section-title">Connected Apps</p>
-      ${appList}
+    <div class="topbar-actions">
+      <button class="topbar-btn" onclick="saveTokens()">Save</button>
+      <button class="topbar-btn primary" onclick="pushAll()">Push All</button>
     </div>
   </div>
+
+  <div class="body">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">Tokens</div>
+      <div class="sidebar-item active" data-panel="colors">
+        <span class="sidebar-icon">\u25CF</span> Colors
+      </div>
+      <div class="sidebar-item" data-panel="typography">
+        <span class="sidebar-icon">Aa</span> Typography
+      </div>
+      <div class="sidebar-item" data-panel="spacing">
+        <span class="sidebar-icon">\u2506</span> Spacing
+      </div>
+      <div class="sidebar-item" data-panel="motion">
+        <span class="sidebar-icon">\u279C</span> Motion
+      </div>
+      <div class="sidebar-section">Preview</div>
+      <div class="sidebar-item" data-panel="components">
+        <span class="sidebar-icon">\u25A1</span> Components
+      </div>
+      <div class="sidebar-section">System</div>
+      <div class="sidebar-item" data-panel="apps">
+        <span class="sidebar-icon">\u26A1</span> Apps
+      </div>
+      <div class="sidebar-item" data-panel="assets">
+        <span class="sidebar-icon">\u2193</span> Assets
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+      <!-- COLORS PANEL -->
+      <div id="panel-colors" class="panel active">
+        <div class="panel-title">Colors</div>
+        <div class="panel-desc">Edit brand colors and scales. Changes update the component previews in real-time.</div>
+
+        <div class="section-label">Brand</div>
+        <div class="token-grid" id="brand-colors"></div>
+
+        <div class="section-label">Semantic</div>
+        <div class="token-grid" id="semantic-colors"></div>
+
+        <div class="section-label">Accent Scale</div>
+        <div class="scale-strip" id="accent-scale"></div>
+
+        <div class="section-label">Gray Scale</div>
+        <div class="scale-strip" id="gray-scale"></div>
+      </div>
+
+      <!-- TYPOGRAPHY PANEL -->
+      <div id="panel-typography" class="panel">
+        <div class="panel-title">Typography</div>
+        <div class="panel-desc">Font families, type scale, and weight system.</div>
+
+        <div class="section-label">Font Families</div>
+        <div class="font-card">
+          <div class="font-card-label">Display / Headings</div>
+          <div style="font-family:var(--font-serif);font-size:clamp(1.6rem,1.5rem + 0.8vw,2rem);font-weight:400;letter-spacing:-0.02em">Cormorant Garamond</div>
+        </div>
+        <div class="font-card">
+          <div class="font-card-label">Body / UI</div>
+          <div style="font-family:var(--font-body);font-size:14px">DM Sans \u2014 The quick brown fox jumps over the lazy dog. 0123456789</div>
+        </div>
+        <div class="font-card">
+          <div class="font-card-label">Labels / Code</div>
+          <div style="font-family:var(--font-mono);font-size:12px">DM Mono \u2014 The quick brown fox jumps over the lazy dog. 0123456789</div>
+        </div>
+
+        <div class="section-label">Type Scale</div>
+        <div id="type-scale"></div>
+      </div>
+
+      <!-- SPACING PANEL -->
+      <div id="panel-spacing" class="panel">
+        <div class="panel-title">Spacing</div>
+        <div class="panel-desc">Base unit and spacing scale. All spacing derives from ${spacing.base}${spacing.unit} base.</div>
+        <div class="section-label">Scale</div>
+        <div style="display:flex;gap:4px;align-items:flex-end">
+          ${[1,2,3,4,6,8,12,16,24,32].map(m => {
+            const px = spacing.base * m;
+            return `<div style="text-align:center">
+              <div style="width:${Math.min(px, 80)}px;height:${Math.min(px, 80)}px;background:var(--color-accent-light);border:1px solid var(--color-accent);border-radius:4px;margin:0 auto 4px"></div>
+              <span style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-faint)">${px}</span>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="section-label">Scrollbar</div>
+        <div class="token-grid">
+          <div class="token-row"><div class="token-info"><div class="token-name">Width</div><div class="token-value">${spacing.scrollbar.width}</div></div></div>
+          <div class="token-row"><div class="token-info"><div class="token-name">Thumb Radius</div><div class="token-value">${spacing.scrollbar.thumbRadius}</div></div></div>
+        </div>
+        <div class="section-label">Focus Ring</div>
+        <div class="token-grid">
+          <div class="token-row"><div class="token-info"><div class="token-name">Outline Width</div><div class="token-value">${spacing.focus.outlineWidth}</div></div></div>
+          <div class="token-row"><div class="token-info"><div class="token-name">Outline Offset</div><div class="token-value">${spacing.focus.outlineOffset}</div></div></div>
+        </div>
+      </div>
+
+      <!-- MOTION PANEL -->
+      <div id="panel-motion" class="panel">
+        <div class="panel-title">Motion</div>
+        <div class="panel-desc">Easing curves, keyframe animations, and transitions.</div>
+        <div class="section-label">Easing</div>
+        <div class="token-grid">
+          ${Object.entries(motion.easing).map(([k, v]) => `
+            <div class="token-row">
+              <div class="token-info"><div class="token-name">${k.replace('--','')}</div><div class="token-value">${v}</div></div>
+            </div>`).join('')}
+        </div>
+        <div class="section-label">Transitions</div>
+        <div class="token-grid">
+          ${Object.entries(motion.transitions).map(([k, v]) => `
+            <div class="token-row">
+              <div class="token-info"><div class="token-name">${k}</div><div class="token-value">${v}</div></div>
+            </div>`).join('')}
+        </div>
+        <div class="section-label">Animations</div>
+        <div class="token-grid">
+          ${Object.entries(motion.animations).map(([k, v]) => `
+            <div class="token-row">
+              <div class="token-info"><div class="token-name">${k}</div><div class="token-value">${v}</div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- COMPONENTS PANEL -->
+      <div id="panel-components" class="panel">
+        <div class="panel-title">Components</div>
+        <div class="panel-desc">Live preview of components using current tokens. Edit colors or type and watch these update.</div>
+
+        <div class="comp-grid">
+          <!-- Buttons -->
+          <div class="comp-card">
+            <div class="comp-card-title">Buttons</div>
+            <div class="comp-row">
+              <button class="preview-btn primary">Primary</button>
+              <button class="preview-btn secondary">Secondary</button>
+              <button class="preview-btn ghost">Ghost</button>
+            </div>
+            <div class="comp-row">
+              <button class="preview-btn primary sm">Small</button>
+              <button class="preview-btn danger sm">Danger</button>
+              <button class="preview-btn secondary sm" disabled>Disabled</button>
+            </div>
+          </div>
+
+          <!-- Card -->
+          <div class="comp-card">
+            <div class="comp-card-title">Card</div>
+            <div class="preview-card">
+              <div class="preview-card-title">Card Title</div>
+              <div class="preview-card-desc">A card component using surface color, border, and text hierarchy tokens.</div>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="comp-card">
+            <div class="comp-card-title">Text Input</div>
+            <div class="comp-row">
+              <input class="preview-input" placeholder="Placeholder text\u2026" />
+            </div>
+            <div class="comp-row" style="margin-top:8px">
+              <input class="preview-input" value="Filled input" />
+            </div>
+          </div>
+
+          <!-- Badges -->
+          <div class="comp-card">
+            <div class="comp-card-title">Badges</div>
+            <div class="comp-row">
+              <span class="preview-badge accent">Accent</span>
+              <span class="preview-badge success">Success</span>
+              <span class="preview-badge warning">Warning</span>
+              <span class="preview-badge danger">Danger</span>
+              <span class="preview-badge neutral">Neutral</span>
+            </div>
+          </div>
+
+          <!-- Alerts -->
+          <div class="comp-card">
+            <div class="comp-card-title">Alerts</div>
+            <div class="comp-row" style="flex-direction:column;gap:8px">
+              <div class="preview-alert success">\u2713 Changes saved successfully</div>
+              <div class="preview-alert warning">\u26A0 Review required before push</div>
+              <div class="preview-alert danger">\u2717 Build failed \u2014 check token syntax</div>
+            </div>
+          </div>
+
+          <!-- Toggle -->
+          <div class="comp-card">
+            <div class="comp-card-title">Toggle</div>
+            <div class="comp-row" style="gap:16px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="preview-toggle on" onclick="this.classList.toggle('on')"><div class="preview-toggle-knob"></div></div>
+                <span style="font-size:13px">Enabled</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="preview-toggle" onclick="this.classList.toggle('on')"><div class="preview-toggle-knob"></div></div>
+                <span style="font-size:13px">Disabled</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="comp-card" style="grid-column:1/-1">
+            <div class="comp-card-title">Table</div>
+            <table class="preview-table">
+              <thead><tr><th>Name</th><th>Framework</th><th>Port</th><th>Status</th></tr></thead>
+              <tbody>
+                ${Object.entries(apps).slice(0, 4).map(([, cfg]) => `
+                <tr>
+                  <td style="font-weight:500">${cfg.label}</td>
+                  <td><code style="font-size:12px">${cfg.framework}</code></td>
+                  <td>${cfg.port || '\u2014'}</td>
+                  <td><span class="preview-badge success">synced</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPS PANEL -->
+      <div id="panel-apps" class="panel">
+        <div class="panel-title">Connected Apps</div>
+        <div class="panel-desc">Push token changes to all apps, or push individually. Pull latest from git.</div>
+
+        <div style="display:flex;gap:8px;margin-bottom:24px">
+          <button class="topbar-btn primary" onclick="pushAll()">Push All Apps</button>
+          <button class="topbar-btn" onclick="gitPull()">Git Pull</button>
+          <button class="topbar-btn" onclick="gitStatus()">Git Status</button>
+        </div>
+
+        <div id="apps-list">
+          ${Object.entries(apps).map(([key, cfg]) => `
+            <div class="app-row" id="app-${key}">
+              <div>
+                <span class="app-name">${cfg.label}</span>
+                <span class="app-meta">${cfg.framework} ${cfg.port ? ':' + cfg.port : ''}</span>
+              </div>
+              <div class="app-actions">
+                <span class="app-status" id="status-${key}">\u2014</span>
+                <button class="topbar-btn" onclick="pushApp('${key}')" style="font-size:9px;padding:4px 10px">Push</button>
+              </div>
+            </div>`).join('')}
+        </div>
+
+        <div class="section-label">Git</div>
+        <pre id="git-output" style="font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary);background:var(--color-surface);padding:16px;border-radius:8px;overflow-x:auto;white-space:pre-wrap;min-height:60px">\u2014</pre>
+      </div>
+
+      <!-- ASSETS PANEL -->
+      <div id="panel-assets" class="panel">
+        <div class="panel-title">Dist Assets</div>
+        <div class="panel-desc">Download compiled CSS files for manual integration.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a href="./gravity.css" class="topbar-btn" style="text-decoration:none;display:inline-block">gravity.css</a>
+          <a href="./gravity-tw4.css" class="topbar-btn" style="text-decoration:none;display:inline-block">gravity-tw4.css</a>
+          <a href="./gravity-tw4-inline.css" class="topbar-btn" style="text-decoration:none;display:inline-block">gravity-tw4-inline.css</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────
+const STATE = {
+  tokens: ${embeddedTokens},
+  apps: ${embeddedApps},
+  dirty: false
+};
+
+// ── Navigation ─────────────────────────────────────────
+document.querySelectorAll('.sidebar-item[data-panel]').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('panel-' + item.dataset.panel).classList.add('active');
+  });
+});
+
+// ── Toast ──────────────────────────────────────────────
+function toast(msg, duration = 2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ── Color Editors ──────────────────────────────────────
+function renderColorGrid(containerId, obj, tokenPath) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  for (const [key, value] of Object.entries(obj)) {
+    if (!key.startsWith('--')) continue;
+    const name = key.replace(/^--color-/, '');
+    const row = document.createElement('div');
+    row.className = 'token-row';
+    row.innerHTML =
+      '<div class="token-swatch" style="background:' + value + '">' +
+        '<input type="color" value="' + toHex(value) + '" data-token="' + key + '" data-path="' + tokenPath + '">' +
+      '</div>' +
+      '<div class="token-info">' +
+        '<div class="token-name">' + name + '</div>' +
+        '<div class="token-value">' + value + '</div>' +
+      '</div>';
+    row.querySelector('input').addEventListener('input', onColorChange);
+    container.appendChild(row);
+  }
+}
+
+function renderScale(containerId, obj) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  for (const [key, value] of Object.entries(obj)) {
+    const step = key.replace(/--color-\\w+-/, '');
+    const chip = document.createElement('div');
+    chip.className = 'scale-chip';
+    chip.innerHTML =
+      '<div class="scale-chip-swatch" style="background:' + value + '">' +
+        '<input type="color" value="' + toHex(value) + '" data-token="' + key + '">' +
+      '</div>' +
+      '<div class="scale-chip-label">' + step + '</div>';
+    chip.querySelector('input').addEventListener('input', onScaleChange);
+    container.appendChild(chip);
+  }
+}
+
+function onColorChange(e) {
+  const token = e.target.dataset.token;
+  const val = e.target.value;
+  document.documentElement.style.setProperty(token, val);
+  e.target.parentElement.style.background = val;
+  e.target.closest('.token-row').querySelector('.token-value').textContent = val;
+
+  // Update state
+  const path = e.target.dataset.path;
+  if (path) updateNestedToken(STATE.tokens.color, path, token, val);
+  STATE.dirty = true;
+}
+
+function onScaleChange(e) {
+  const token = e.target.dataset.token;
+  const val = e.target.value;
+  document.documentElement.style.setProperty(token, val);
+  e.target.parentElement.style.background = val;
+
+  // Update state in scales
+  for (const scale of Object.values(STATE.tokens.color.scales)) {
+    if (scale[token] !== undefined) { scale[token] = val; break; }
+  }
+  STATE.dirty = true;
+}
+
+function updateNestedToken(obj, path, token, val) {
+  const parts = path.split('.');
+  let ref = obj;
+  for (const p of parts) ref = ref[p];
+  if (ref) ref[token] = val;
+}
+
+function toHex(color) {
+  if (color.startsWith('#') && (color.length === 7 || color.length === 4)) return color.length === 4
+    ? '#' + color[1]+color[1]+color[2]+color[2]+color[3]+color[3]
+    : color;
+  if (color.startsWith('rgba') || color.startsWith('rgb')) {
+    const m = color.match(/[\\d.]+/g);
+    if (m && m.length >= 3) {
+      const r = parseInt(m[0]).toString(16).padStart(2,'0');
+      const g = parseInt(m[1]).toString(16).padStart(2,'0');
+      const b = parseInt(m[2]).toString(16).padStart(2,'0');
+      return '#' + r + g + b;
+    }
+  }
+  return '#888888';
+}
+
+// ── Type Scale ─────────────────────────────────────────
+function renderTypeScale() {
+  const container = document.getElementById('type-scale');
+  container.innerHTML = '';
+  for (const [key, value] of Object.entries(STATE.tokens.typography.scale)) {
+    const name = key.replace('--text-', '');
+    const row = document.createElement('div');
+    row.className = 'type-preview';
+    row.innerHTML =
+      '<div class="type-label">' + name + '</div>' +
+      '<div class="type-sample" style="font-size:' + value + '">The quick brown fox jumps over the lazy dog</div>';
+    container.appendChild(row);
+  }
+}
+
+// ── Init Renders ───────────────────────────────────────
+renderColorGrid('brand-colors', STATE.tokens.color.brand, 'brand');
+renderColorGrid('semantic-colors', STATE.tokens.color.semantic, 'semantic');
+renderScale('accent-scale', STATE.tokens.color.scales.indigo);
+renderScale('gray-scale', STATE.tokens.color.scales.gray);
+renderTypeScale();
+
+// ── API Calls ──────────────────────────────────────────
+async function saveTokens() {
+  if (!STATE.dirty) { toast('No changes to save'); return; }
+  try {
+    await fetch('/api/tokens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file: 'color.json', data: STATE.tokens.color })
+    });
+    STATE.dirty = false;
+    toast('Tokens saved');
+  } catch (e) { toast('Save failed: ' + e.message); }
+}
+
+async function pushAll() {
+  toast('Pushing to all apps\u2026');
+  try {
+    const res = await fetch('/api/push', { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      toast('Push complete');
+      document.getElementById('git-output').textContent = data.output || 'Done';
+    } else {
+      toast('Push failed');
+      document.getElementById('git-output').textContent = data.error || 'Unknown error';
+    }
+  } catch (e) { toast('Push failed: ' + e.message); }
+}
+
+async function pushApp(key) {
+  const statusEl = document.getElementById('status-' + key);
+  statusEl.textContent = 'pushing\u2026';
+  try {
+    const res = await fetch('/api/push', { method: 'POST' });
+    const data = await res.json();
+    statusEl.textContent = data.ok ? 'pushed' : 'failed';
+    setTimeout(() => statusEl.textContent = '\u2014', 3000);
+  } catch (e) { statusEl.textContent = 'error'; }
+}
+
+async function gitPull() {
+  toast('Pulling latest\u2026');
+  try {
+    const res = await fetch('/api/git', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'pull' })
+    });
+    const data = await res.json();
+    document.getElementById('git-output').textContent = data.output || data.error || JSON.stringify(data);
+    toast(data.ok ? 'Pull complete' : 'Pull failed');
+  } catch (e) { toast('Pull failed: ' + e.message); }
+}
+
+async function gitStatus() {
+  try {
+    const res = await fetch('/api/git');
+    const data = await res.json();
+    document.getElementById('git-output').textContent =
+      'Branch: ' + data.branch + '\\n\\nStatus:\\n' + data.status + '\\n\\nRecent commits:\\n' + data.log;
+  } catch (e) {
+    document.getElementById('git-output').textContent = 'Error: ' + e.message;
+  }
+}
+
+// ── Agent Bar ──────────────────────────────────────────
+document.getElementById('agentInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && this.value.trim()) {
+    const cmd = this.value.trim();
+    toast('Agent command: "' + cmd + '" \u2014 processing on server requires Claude integration');
+    this.value = '';
+  }
+});
+</script>
 </body>
 </html>`;
 }
