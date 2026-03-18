@@ -51,6 +51,41 @@ function loadApps() {
   return loadJSON(path.join(ROOT, 'apps.json'));
 }
 
+// Build Google Fonts URL from font tokens
+function buildGoogleFontsUrl(fonts) {
+  const families = [];
+  const seen = new Set();
+
+  for (const [key, value] of Object.entries(fonts)) {
+    if (key === 'import') continue;
+    // Extract primary font name from stack like "\"Inter\", -apple-system, sans-serif"
+    const primary = value.split(',')[0].replace(/"/g, '').trim();
+    if (!primary || seen.has(primary)) continue;
+    seen.add(primary);
+
+    // Determine weights based on role
+    let weights;
+    if (key.includes('mono')) {
+      weights = '400;500';
+    } else if (key.includes('serif') || key.includes('display')) {
+      weights = 'ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400';
+    } else {
+      weights = 'ital,wght@0,300;0,400;0,500;0,600;0,700;1,400';
+    }
+
+    const encoded = primary.replace(/\s+/g, '+');
+    families.push(`family=${encoded}:${weights}`);
+  }
+
+  return `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`;
+}
+
+// Resolve a font name to its Google Fonts URL for dynamic loading
+function googleFontUrl(fontName) {
+  const encoded = fontName.trim().replace(/\s+/g, '+');
+  return `https://fonts.googleapis.com/css2?family=${encoded}:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap`;
+}
+
 // ── API Routes ──────────────────────────────────────────
 
 const routes = {
@@ -203,6 +238,37 @@ const routes = {
     json(res, { ok: true, component: data });
   },
 
+  // ── Fonts: change font for a role, rebuild import URL ──
+  'POST /api/fonts': async (req, res) => {
+    const { role, font } = await readBody(req);
+    const validRoles = ['serif', 'display', 'body', 'sans', 'mono'];
+    if (!role || !font || !validRoles.includes(role)) {
+      return json(res, { error: 'Need role (serif|display|body|sans|mono) and font name' }, 400);
+    }
+    const typography = loadJSON(path.join(TOKENS_DIR, 'typography.json'));
+    const key = `--font-${role}`;
+    if (!typography.fonts[key]) return json(res, { error: `Unknown font role: ${role}` }, 400);
+
+    const oldFont = typography.fonts[key].split(',')[0].replace(/"/g, '').trim();
+    const trimmed = font.trim();
+    typography.fonts[key] = typography.fonts[key].replace(oldFont, trimmed);
+
+    // If serif changes, also update display (they're usually paired)
+    if (role === 'serif' && typography.fonts['--font-display']) {
+      const oldDisplay = typography.fonts['--font-display'].split(',')[0].replace(/"/g, '').trim();
+      typography.fonts['--font-display'] = typography.fonts['--font-display'].replace(oldDisplay, trimmed);
+    }
+    if (role === 'body' && typography.fonts['--font-sans']) {
+      const oldSans = typography.fonts['--font-sans'].split(',')[0].replace(/"/g, '').trim();
+      typography.fonts['--font-sans'] = typography.fonts['--font-sans'].replace(oldSans, trimmed);
+    }
+
+    // Rebuild import URL
+    typography.fonts.import = buildGoogleFontsUrl(typography.fonts);
+    fs.writeFileSync(path.join(TOKENS_DIR, 'typography.json'), JSON.stringify(typography, null, 2), 'utf-8');
+    json(res, { ok: true, role, font: trimmed, fontImport: typography.fonts.import, fonts: typography.fonts });
+  },
+
   // ── Agent: execute design commands ──
   'POST /api/agent': async (req, res) => {
     const { command } = await readBody(req);
@@ -250,16 +316,20 @@ function executeAgentCommand(command) {
   }
 
   // Font changes: "set body font to Inter", "serif font Playfair Display"
-  const fontMatch = cmd.match(/(?:set|change)?\s*(serif|body|mono|display|sans)\s*(?:font\s*)?(?:to\s+|=\s*)?["']?([^"']+)["']?/);
+  // Use original command (not lowercased) to preserve font name casing
+  const fontMatch = command.trim().match(/(?:set|change)?\s*(serif|body|mono|display|sans)\s*(?:font\s*)?(?:to\s+|=\s*)?["']?([^"']+)["']?/i);
   if (fontMatch) {
     const [, role, fontName] = fontMatch;
     const fontMap = { serif: '--font-serif', display: '--font-display', body: '--font-body', sans: '--font-sans', mono: '--font-mono' };
     const key = fontMap[role];
     if (key && typography.fonts[key]) {
       const oldFont = typography.fonts[key].split(',')[0].replace(/"/g, '').trim();
-      typography.fonts[key] = typography.fonts[key].replace(oldFont, fontName.trim());
+      const trimmed = fontName.trim();
+      typography.fonts[key] = typography.fonts[key].replace(oldFont, trimmed);
+      // Rebuild Google Fonts import URL from all current font families
+      typography.fonts.import = buildGoogleFontsUrl(typography.fonts);
       fs.writeFileSync(path.join(TOKENS_DIR, 'typography.json'), JSON.stringify(typography, null, 2), 'utf-8');
-      return { ok: true, action: 'font-change', role, font: fontName.trim(), message: `Set ${role} font to ${fontName.trim()}` };
+      return { ok: true, action: 'font-change', role, font: trimmed, fontImport: typography.fonts.import, message: `Set ${role} font to ${trimmed}` };
     }
   }
 

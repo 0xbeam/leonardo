@@ -551,6 +551,40 @@ ${cssVars}
     .p-toggle-knob { width: 18px; height: 18px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: transform 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
     .p-toggle.on .p-toggle-knob { transform: translateX(18px); }
 
+    /* ── Font Editor ──────────────────────────────────── */
+    .font-card {
+      padding: 18px 20px; border: 1px solid var(--color-border); border-radius: 12px;
+      display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: start;
+      transition: border-color 0.15s ease;
+    }
+    .font-card:hover { border-color: var(--color-border-light); }
+    .font-card-role {
+      font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--color-text-faint); grid-column: 1 / -1;
+    }
+    .font-card-preview {
+      font-size: clamp(1.2rem, 1.1rem + 0.4vw, 1.5rem); font-weight: 400;
+      letter-spacing: -0.02em; line-height: 1.3; min-height: 1.8em;
+    }
+    .font-card-input {
+      font-family: var(--font-mono); font-size: 13px; padding: 8px 12px;
+      border: 1px solid var(--color-border); border-radius: 8px;
+      background: var(--color-surface); color: var(--color-text); outline: none;
+      width: 220px; transition: border-color 0.15s ease;
+    }
+    .font-card-input:focus { border-color: var(--color-accent); }
+    .font-card-input::placeholder { color: var(--color-text-faint); }
+    .font-card-fallback {
+      font-family: var(--font-mono); font-size: 10px; color: var(--color-text-faint);
+      grid-column: 1 / -1;
+    }
+    .font-loading {
+      display: inline-block; width: 12px; height: 12px; border: 2px solid var(--color-border);
+      border-top-color: var(--color-accent); border-radius: 50%;
+      animation: spin 0.6s linear infinite; margin-left: 8px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* ── Create Panel ───────────────────────────────── */
     .create-form { display: grid; gap: 12px; max-width: 640px; }
     .create-field label {
@@ -712,22 +746,9 @@ ${cssVars}
       <!-- TYPOGRAPHY -->
       <div id="panel-type" class="panel">
         <div class="panel-title">Typography</div>
-        <div class="panel-sub">Font families and type scale.</div>
+        <div class="panel-sub">Change fonts live. Type a Google Fonts name and press Enter \u2014 the font loads instantly.</div>
         <div class="label">Families</div>
-        <div style="display:grid;gap:8px">
-          <div style="padding:16px;border:1px solid var(--color-border);border-radius:10px">
-            <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin-bottom:6px">Display</div>
-            <div style="font-family:var(--font-serif);font-size:clamp(1.4rem,1.3rem+0.6vw,1.8rem);font-weight:400;letter-spacing:-0.02em">Cormorant Garamond</div>
-          </div>
-          <div style="padding:16px;border:1px solid var(--color-border);border-radius:10px">
-            <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin-bottom:6px">Body</div>
-            <div style="font-family:var(--font-body);font-size:14px">DM Sans \u2014 The quick brown fox jumps over the lazy dog</div>
-          </div>
-          <div style="padding:16px;border:1px solid var(--color-border);border-radius:10px">
-            <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin-bottom:6px">Mono</div>
-            <div style="font-family:var(--font-mono);font-size:12px">DM Mono \u2014 The quick brown fox jumps over the lazy dog</div>
-          </div>
-        </div>
+        <div style="display:grid;gap:10px" id="font-editors"></div>
         <div class="label">Scale</div>
         <div id="type-scale"></div>
       </div>
@@ -860,7 +881,11 @@ async function agentCmd(command) {
         // Refresh token state from server
         refreshTokens();
       }
-      if (data.action === 'font-change') refreshTokens();
+      if (data.action === 'font-change') {
+        // Dynamically load the new font, then refresh
+        if (data.font) loadGoogleFont(data.font).then(() => refreshTokens()).catch(() => refreshTokens());
+        else refreshTokens();
+      }
       if (data.action === 'pull-all' && data.results) {
         const out = Object.entries(data.results).map(([k,v]) => k + ': ' + v).join('\\n');
         document.getElementById('git-output').textContent = out;
@@ -885,6 +910,7 @@ async function refreshTokens() {
     renderColorGrid('semantic-colors', tokens.color.semantic, 'semantic');
     renderScale('accent-scale', tokens.color.scales.indigo);
     renderScale('gray-scale', tokens.color.scales.gray);
+    renderFontEditors();
     renderTypeScale();
   } catch (e) { /* server might not be running */ }
 }
@@ -937,6 +963,87 @@ function toHex(c) {
 }
 
 // ── Type Scale ─────────────────────────────────────────
+// ── Font Editor ─────────────────────────────────────────
+const FONT_ROLES = [
+  { role: 'serif', label: 'Display / Serif', cssVar: '--font-serif', previewStyle: 'font-size:clamp(1.4rem,1.3rem+0.6vw,1.8rem);letter-spacing:-0.02em' },
+  { role: 'body', label: 'Body / Sans', cssVar: '--font-body', previewStyle: 'font-size:14px' },
+  { role: 'mono', label: 'Mono / Code', cssVar: '--font-mono', previewStyle: 'font-size:12px' },
+];
+
+function loadGoogleFont(fontName) {
+  return new Promise((resolve, reject) => {
+    const encoded = fontName.replace(/\\s+/g, '+');
+    const url = 'https://fonts.googleapis.com/css2?family=' + encoded + ':ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap';
+    // Check if already loaded
+    const existing = document.querySelector('link[href*="' + encoded + '"]');
+    if (existing) { resolve(); return; }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = url;
+    link.onload = resolve;
+    link.onerror = reject;
+    document.head.appendChild(link);
+  });
+}
+
+function renderFontEditors() {
+  const c = document.getElementById('font-editors'); if (!c) return; c.innerHTML = '';
+  const fonts = STATE.tokens.typography.fonts;
+  for (const { role, label, cssVar, previewStyle } of FONT_ROLES) {
+    const currentFont = (fonts[cssVar] || '').split(',')[0].replace(/"/g, '').trim();
+    const fallback = (fonts[cssVar] || '').split(',').slice(1).map(s => s.trim()).join(', ');
+    const card = document.createElement('div');
+    card.className = 'font-card';
+    card.innerHTML = '<div class="font-card-role">' + label + '</div>' +
+      '<div class="font-card-preview" id="preview-' + role + '" style="font-family:var(' + cssVar + ');' + previewStyle + '">' + currentFont + ' \\u2014 The quick brown fox</div>' +
+      '<div><input class="font-card-input" id="font-input-' + role + '" value="' + currentFont + '" placeholder="Google Fonts name\\u2026" data-role="' + role + '" data-var="' + cssVar + '" />' +
+      '<span id="font-status-' + role + '"></span></div>' +
+      '<div class="font-card-fallback">Fallback: ' + (fallback || 'none') + '</div>';
+    c.appendChild(card);
+
+    // Listen for Enter key to apply font
+    card.querySelector('.font-card-input').addEventListener('keydown', async function(e) {
+      if (e.key !== 'Enter') return;
+      const newFont = this.value.trim();
+      if (!newFont) return;
+      const r = this.dataset.role;
+      const v = this.dataset.var;
+      const statusEl = document.getElementById('font-status-' + r);
+      statusEl.innerHTML = '<span class="font-loading"></span>';
+
+      try {
+        // Load the font first
+        await loadGoogleFont(newFont);
+        // Apply to CSS
+        document.documentElement.style.setProperty(v, '"' + newFont + '", ' + (fonts[v] || '').split(',').slice(1).join(','));
+        // Update preview
+        document.getElementById('preview-' + r).textContent = newFont + ' \\u2014 The quick brown fox';
+        // Save to server
+        const res = await fetch('/api/fonts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: r, font: newFont })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          statusEl.innerHTML = '<span style="color:var(--color-success);font-size:11px">\\u2713</span>';
+          log('Font changed: <strong>' + r + '</strong> \\u2192 ' + newFont, 'success');
+          toast('Font: ' + r + ' \\u2192 ' + newFont);
+          STATE.dirty = true;
+          // Refresh tokens from server
+          refreshTokens();
+        } else {
+          statusEl.innerHTML = '<span style="color:var(--color-danger);font-size:11px">\\u2717</span>';
+        }
+        setTimeout(() => { statusEl.innerHTML = ''; }, 3000);
+      } catch (err) {
+        statusEl.innerHTML = '<span style="color:var(--color-danger);font-size:10px">Font not found</span>';
+        setTimeout(() => { statusEl.innerHTML = ''; }, 3000);
+      }
+    });
+  }
+}
+
 function renderTypeScale() {
   const c = document.getElementById('type-scale'); if (!c) return; c.innerHTML = '';
   for (const [key, value] of Object.entries(STATE.tokens.typography.scale)) {
@@ -1032,9 +1139,10 @@ renderColorGrid('brand-colors', STATE.tokens.color.brand, 'brand');
 renderColorGrid('semantic-colors', STATE.tokens.color.semantic, 'semantic');
 renderScale('accent-scale', STATE.tokens.color.scales.indigo);
 renderScale('gray-scale', STATE.tokens.color.scales.gray);
+renderFontEditors();
 renderTypeScale();
 loadCustomComponents();
-log('Try: <strong>set accent to #3B82F6</strong> or <strong>pull all</strong>');
+log('Try: <strong>set accent to #3B82F6</strong> or <strong>change body font to Inter</strong>');
 </script>
 </body>
 </html>`;
